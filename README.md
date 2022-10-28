@@ -27,11 +27,11 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 | Parameter | Description | Comment |
 | ------ | ------ | ------ |
 | -? or -h | display help message | |
-| -v | activate verbose mode to print out for every query or update | |
-| -q | set query type "stabbing" or "range" | Only for querying |
-| -r | set the number of runs per query; by default 1 | Only for querying |
+| -v | activate verbose mode; print the trace for every query; otherwise only the final report | |
+| -q | set predicate type: "EQUALS" or "STARTS" or "STARTED" or "FINISHES" or "FINISHED" or "MEETS" or "MET" or "OVERLAPS" or "OVERLAPPED" or "CONTAINS" or "CONTAINED" or "BEFORE" or "AFTER" or "GOVERLAPS" | |
+| -r | set the number of runs per query; by default 1 |  |
 
-## Indexing methods
+## Indexing and query processing methods
 
 ### Linear scan:
 
@@ -40,7 +40,7 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 - containers/relation.h
 - containers/relation.cpp
 
-- ##### Range query
+- ##### Examples
 
     ```sh
     $ ./query_lscan.exec -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
@@ -62,22 +62,13 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 | ------ | ------ | ------ |
 | -p | set the number of partitions | 500 for BOOKS in the experiments |
 
-- ##### Stabbing query    
+- ##### Examples
 
     ```sh
-    $ ./query_1dgrid.exec -p 500 -q stabbing samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
+    $ ./query_1dgrid.exec -p 100 -q gOVERLAPS -r 10 AARHUS-BOOKS_2013.dat AARHUS-BOOKS_2013_20k.qry
     ```
-
-- ##### Range query
-
     ```sh
-    $ ./query_1dgrid.exec -p 500 -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
-    ```
-
-- ##### Update - Mixed Workload 10k Queries/5k Insertions/1k Deletions
-
-    ```sh
-    $ ./update_1dgrid.exec -p 500 -q range samples/BOOKS_first90.txt samples/BOOKS_updates.mix
+    $ ./query_1dgrid.exec -p 300 -q gOVERLAPS -v AARHUS-BOOKS_2013.dat AARHUS-BOOKS_2013_20k.qry
     ```
 
 
@@ -93,30 +84,15 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 #### Execution
 | Extra parameter | Description | Comment |
 | ------ | ------ | ------ |
-| -o | activate the skewness & sparsity optimization |  Only for querying |
+| -o | activate the skewness & sparsity optimization |  |
 
-- ##### Stabbing query    
+- ##### Examples    
 
     ```sh
-    $ ./query_hint.exec -q stabbing samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
+    $ ./query_hint.exec -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ```sh
-    $ ./query_hint.exec -o -q stabbing samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
-    ```
-
-- ##### Range query
-
-    ```sh
-    $ ./query_hint.exec -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
-    ```
-    ```sh
-    $ ./query_hint.exec -o -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
-    ```
-
-- ##### Update - Mixed Workload 10k Queries/5k Insertions/1k Deletions
-
-    ```sh
-    $ ./update_hint.exec -q range samples/BOOKS_first90.txt samples/BOOKS_updates.mix
+    $ ./query_hint.exec -o SS -q gOVERLAPS -v data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
 
 
@@ -133,8 +109,8 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 | Extra parameter | Description | Comment |
 | ------ | ------ | ------ |
 | -b |  set the number of bits | 10 for BOOKS in the experiments |
-| -t  |  activate the top-down evaluation approach |  Available only for base HINT<sup>m</sup> and the range query; omit option for bottom-up |
-| -o |  set optimizations to be used: "subs+sort" or "subs+sopt" or "subs+sort+sopt" or "subs+sort+sopt+ss" or "subs+sort+sopt+cm" or "all"| Omit option for base HINT<sup>m</sup> |
+| -o |  set optimizations to be used: "subs+sort" or "subs+sopt" or "subs+sort+sopt" or "subs+sort+sopt+ss" or "subs+sort+sopt+cm" or "all" or "subs+sort+ss+cm"| omit parameter for base HINT<sup>m</sup> |
+| -t |  evaluate query traversing the hierarchy in a top-down fashion; by default the bottom-up approach is used | currently supported only by base HINT<sup>m</sup> |
 
 - ##### Stabbing query    
 
@@ -176,14 +152,3 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
     ```sh
     $ ./query_hint_m.exec -b 10 -o all -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
     ```
-
-- ##### Update - Mixed Workload 10k Queries/5k Insertions/1k Deletions (only bottom-up)
-
-    ```sh
-    $ ./update_hint_m.exec -b 10 -q range -o subs+sopt samples/BOOKS_first90.txt samples/BOOKS_updates.mix
-    ```
-
-    ```sh
-    $ ./update_hint_m.exec -b 10 -q range -o all samples/BOOKS_first90.txt samples/BOOKS_updates.mix
-    ```
-
