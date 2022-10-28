@@ -128,7 +128,7 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 | Extra parameter | Description | Comment |
 | ------ | ------ | ------ |
 | -m |  set the number of bits | 10 for BOOKS in the experiments |
-| -o |  set optimizations to be used: "subs+sort" or "subs+sopt" or "subs+sort+sopt" or "subs+sort+sopt+ss" or "subs+sort+sopt+cm" or "all" or "subs+sort+ss+cm"| omit parameter for base HINT<sup>m</sup>; "ss" -> sparsity & skewness optimization; "cm" -> cache misses optimization |
+| -o |  set optimizations to be used: "subs+sort" or "subs+sopt" or "subs+sort+sopt" or "subs+sort+sopt+ss" or "subs+sort+sopt+cm" or "subs+sort+ss+cm" or "all"| omit parameter for base HINT<sup>m</sup>; "ss" -> sparsity & skewness optimization; "cm" -> cache misses optimization |
 | -t |  evaluate query traversing the hierarchy in a top-down fashion; by default the bottom-up approach is used | currently supported only by base HINT<sup>m</sup> |
 
 - ##### Examples
