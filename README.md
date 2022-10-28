@@ -2,7 +2,7 @@
 
 Source code for the following publications:
 - George Christodoulou, Panagiotis Bouros, Nikos Mamoulis, <i>HINT: A Hierarchical Interval Index for Allen Relationships</i>, under review
-- George Christodoulou, Panagiotis Bouros, Nikos Mamoulis, <i>HINT: A Hierarchical Index for Intervals in Main Memory</i>, ACM SIGMOD Conference, pp. 1257-1270, 2022, https://doi.org/10.1145/3514221.3517873
+- George Christodoulou, Panagiotis Bouros, Nikos Mamoulis, <i>HINT: A Hierarchical Index for Intervals in Main Memory</i>, https://doi.org/10.1145/3514221.3517873, ACM SIGMOD Conference, pp. 1257-1270 (2022)
 
 ## Dependencies
 - g++/gcc
