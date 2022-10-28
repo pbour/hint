@@ -28,7 +28,7 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 | ------ | ------ | ------ |
 | -? or -h | display help message | |
 | -v | activate verbose mode; print the trace for every query; otherwise only the final report | |
-| -q | set predicate type: "EQUALS" or "STARTS" or "STARTED" or "FINISHES" or "FINISHED" or "MEETS" or "MET" or "OVERLAPS" or "OVERLAPPED" or "CONTAINS" or "CONTAINED" or "BEFORE" or "AFTER" or "gOVERLAPS" | gOverlaps from ACM SIGMOD 2022 puclication|
+| -q | set predicate type: "EQUALS" or "STARTS" or "STARTED" or "FINISHES" or "FINISHED" or "MEETS" or "MET" or "OVERLAPS" or "OVERLAPPED" or "CONTAINS" or "CONTAINED" or "BEFORE" or "AFTER" or "gOVERLAPS" | basic predicates of Allen's algebra; gOverlaps from ACM SIGMOD 2022 publication |
 | -r | set the number of runs per query; by default 1 |  |
 
 ## Indexing and query processing methods
