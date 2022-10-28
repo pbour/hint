@@ -56,6 +56,8 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 
 #### Source code files
 - main_1dgrid.cpp
+- containers/relation.h
+- containers/relation.cpp
 - indices/1dgrid.h
 - indices/1dgrid.cpp
 
@@ -78,6 +80,8 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 
 #### Source code files
 - main_hint.cpp
+- containers/relation.h
+- containers/relation.cpp
 - indices/hierarchicalindex.h
 - indices/hierarchicalindex.cpp
 - indices/hint.h
@@ -102,6 +106,12 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 
 #### Source code files
 - main_hint_m.cpp
+- containers/relation.h
+- containers/relation.cpp
+- containers/offsets.h
+- containers/offsets.cpp
+- containers/offsets_templates.h
+- containers/offsets_templates.cpp
 - indices/hierarchicalindex.h
 - indices/hierarchicalindex.cpp
 - indices/hint_m.h
