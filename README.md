@@ -2,7 +2,7 @@
 
 Source code for the following publications:
 - George Christodoulou, Panagiotis Bouros, Nikos Mamoulis: HINT: A Hierarchical Index for Intervals in Main Memory. SIGMOD Conference 2022: 1257-1270, https://doi.org/10.1145/3514221.3517873
-- 
+- TODO
 
 ## Dependencies
 - g++/gcc
@@ -23,6 +23,7 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
    - hint
    - hint_m 
 
+
 ## Shared parameters among all indexing methods
 | Parameter | Description | Comment |
 | ------ | ------ | ------ |
@@ -30,6 +31,7 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 | -v | activate verbose mode; print the trace for every query; otherwise only the final report | |
 | -q | set predicate type: "EQUALS" or "STARTS" or "STARTED" or "FINISHES" or "FINISHED" or "MEETS" or "MET" or "OVERLAPS" or "OVERLAPPED" or "CONTAINS" or "CONTAINED" or "BEFORE" or "AFTER" or "gOVERLAPS" | basic predicates of Allen's algebra; gOverlaps from ACM SIGMOD 2022 publication |
 | -r | set the number of runs per query; by default 1 |  |
+
 
 ## Indexing and query processing methods
 
@@ -115,7 +117,7 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 #### Execution
 | Extra parameter | Description | Comment |
 | ------ | ------ | ------ |
-| -b |  set the number of bits | 10 for BOOKS in the experiments |
+| -m |  set the number of bits | 10 for BOOKS in the experiments |
 | -o |  set optimizations to be used: "subs+sort" or "subs+sopt" or "subs+sort+sopt" or "subs+sort+sopt+ss" or "subs+sort+sopt+cm" or "all" or "subs+sort+ss+cm"| omit parameter for base HINT<sup>m</sup>; "ss" -> sparsity & skewness optimization; "cm" -> cache misses optimization |
 | -t |  evaluate query traversing the hierarchy in a top-down fashion; by default the bottom-up approach is used | currently supported only by base HINT<sup>m</sup> |
 
@@ -123,37 +125,43 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 
     ###### base with top-down
     ```sh
-    $ ./query_hint_m.exec -b 10 -t -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -t -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### base with bottom-up
     ```sh
-    $ ./query_hint_m.exec -b 10 -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o subs+sort -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sort -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sopt (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o subs+sopt -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sopt -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort+sopt (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o subs+sort+sopt -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort+sopt+ss (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o subs+sort+sopt+ss -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt+ss -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort+sopt+cm (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o subs+sort+sopt+cm -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt+cm -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort+ss+cm optimizations  (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o subs+sort+sopt+cm -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt+cm -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### all optimizations  (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o all -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o all -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
+
+
+## Notes / TODOs
+The following are missing from the current version of the code:
+- Updates
+- Model for automatically setting paramter "m" on HINT<sup>m</sup>
