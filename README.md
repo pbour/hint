@@ -1,8 +1,8 @@
 # HINT: A Hierarchical Index for Intervals in Main Memory
 
 Source code for the following publications:
-- George Christodoulou, Panagiotis Bouros, Nikos Mamoulis: HINT: A Hierarchical Index for Intervals in Main Memory. SIGMOD Conference 2022: 1257-1270, https://doi.org/10.1145/3514221.3517873
-- TODO
+- George Christodoulou, Panagiotis Bouros, Nikos Mamoulis, HINT: A Hierarchical Interval Index for Allen Relationships.
+- George Christodoulou, Panagiotis Bouros, Nikos Mamoulis, <i>HINT: A Hierarchical Index for Intervals in Main Memory</i>, SIGMOD Conference 2022: 1257-1270, https://doi.org/10.1145/3514221.3517873
 
 ## Dependencies
 - g++/gcc
@@ -174,4 +174,4 @@ Compile using ```make all``` or ```make <option>``` where `<option>` can be one 
 ## Notes / TODOs
 The following are missing from the current version of the code:
 - Updates
-- Model for automatically setting paramter "m" on HINT<sup>m</sup>
+- Model for automatically setting parameter "m" on HINT<sup>m</sup>
