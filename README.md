@@ -28,7 +28,7 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 | ------ | ------ | ------ |
 | -? or -h | display help message | |
 | -v | activate verbose mode; print the trace for every query; otherwise only the final report | |
-| -q | set predicate type: "EQUALS" or "STARTS" or "STARTED" or "FINISHES" or "FINISHED" or "MEETS" or "MET" or "OVERLAPS" or "OVERLAPPED" or "CONTAINS" or "CONTAINED" or "BEFORE" or "AFTER" or "GOVERLAPS" | |
+| -q | set predicate type: "EQUALS" or "STARTS" or "STARTED" or "FINISHES" or "FINISHED" or "MEETS" or "MET" or "OVERLAPS" or "OVERLAPPED" or "CONTAINS" or "CONTAINED" or "BEFORE" or "AFTER" or "gOVERLAPS" | gOverlaps from ACM SIGMOD 2022 puclication|
 | -r | set the number of runs per query; by default 1 |  |
 
 ## Indexing and query processing methods
@@ -104,51 +104,56 @@ Compile using ```make all``` or ```make <option>``` where <option> can be one of
 - indices/hierarchicalindex.cpp
 - indices/hint_m.h
 - indices/hint_m.cpp
+- indices/hint_m_subs+sort.cpp
+- indices/hint_m_subs+sopt.cpp
+- indices/hint_m_subs+sort+sopt.cpp
+- indices/hint_m_subs+sort+sopt+ss.cpp
+- indices/hint_m_subs+sort+sopt+cm.cpp
+- indices/hint_m_subs+sort+ss+cm.cpp
+- indices/hint_m_all.cpp
 
 #### Execution
 | Extra parameter | Description | Comment |
 | ------ | ------ | ------ |
 | -b |  set the number of bits | 10 for BOOKS in the experiments |
-| -o |  set optimizations to be used: "subs+sort" or "subs+sopt" or "subs+sort+sopt" or "subs+sort+sopt+ss" or "subs+sort+sopt+cm" or "all" or "subs+sort+ss+cm"| omit parameter for base HINT<sup>m</sup> |
+| -o |  set optimizations to be used: "subs+sort" or "subs+sopt" or "subs+sort+sopt" or "subs+sort+sopt+ss" or "subs+sort+sopt+cm" or "all" or "subs+sort+ss+cm"| omit parameter for base HINT<sup>m</sup>; "ss" -> sparsity & skewness optimization; "cm" -> cache misses optimization |
 | -t |  evaluate query traversing the hierarchy in a top-down fashion; by default the bottom-up approach is used | currently supported only by base HINT<sup>m</sup> |
 
-- ##### Stabbing query    
-
-    ```sh
-    $ ./query_hint_m.exec -b 10 -o all -q stabbing samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
-    ```
-
-- ##### Range query
+- ##### Examples
 
     ###### base with top-down
     ```sh
-    $ ./query_hint_m.exec -t -b 10 -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
+    $ ./query_hint_m.exec -b 10 -t -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### base with bottom-up
     ```sh
-    $ ./query_hint_m.exec -b 10 -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
+    $ ./query_hint_m.exec -b 10 -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o subs+sort -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
+    $ ./query_hint_m.exec -b 10 -o subs+sort -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sopt (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o subs+sopt -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
+    $ ./query_hint_m.exec -b 10 -o subs+sopt -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort+sopt (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o subs+sort+sopt -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
+    $ ./query_hint_m.exec -b 10 -o subs+sort+sopt -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
-    ###### subs+sort+sopt+ss (only bottom-up, "ss" -> sparsity & skewness optimization)
+    ###### subs+sort+sopt+ss (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o subs+sort+sopt+ss -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
+    $ ./query_hint_m.exec -b 10 -o subs+sort+sopt+ss -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
-    ###### subs+sort+sopt+cm (only bottom-up, "cm" -> cache misses optimization)
+    ###### subs+sort+sopt+cm (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o subs+sort+sopt+cm -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
+    $ ./query_hint_m.exec -b 10 -o subs+sort+sopt+cm -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    ```
+    ###### subs+sort+ss+cm optimizations  (only bottom-up)
+    ```sh
+    $ ./query_hint_m.exec -b 10 -o subs+sort+sopt+cm -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### all optimizations  (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -b 10 -o all -q range samples/BOOKS.txt samples/BOOKS_c0.1%_n10000.txt
+    $ ./query_hint_m.exec -b 10 -o all -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
     ```
