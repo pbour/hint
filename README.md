@@ -17,7 +17,7 @@ Directory  ```data``` includes the BOOKS dataset used in the experiments and a q
 
 
 ## Compile
-Compile using ```make all``` or ```make <option>``` where <option> can be one of the following:
+Compile using ```make all``` or ```make <option>``` where `<option>` can be one of the following:
    - lscan 
    - 1dgrid 
    - hint
