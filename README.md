@@ -35,10 +35,10 @@ Compile using ```make all``` or ```make <option>``` where `<option>` can be one 
 
 ## Workloads
 The code supports two types of workload:
-- Counting the qualifying records
+- Counting the qualifying records, or
 - XOR'ing between their ids
 
-You can switch between the two by appropriately settings the `WORKLOAD_COUNT` flag in def_global.h; remember to use `make clean` when changing the flag. 
+You can switch between the two by appropriately setting the `WORKLOAD_COUNT` flag in def_global.h; remember to use `make clean` when changing the flag. 
 
 
 ## Indexing and query processing methods
