@@ -11,7 +11,7 @@ Source code from the following publications:
 
 ## Data
 
-Directory  ```data``` includes the BOOKS dataset used in the experiments and a query file containing 20k queries 
+Directory  ```samples``` includes the BOOKS dataset used in the experiments and a query file containing 20k queries 
 - AARHUS-BOOKS_2013.dat
 - AARHUS-BOOKS_2013.qry
 
