@@ -38,7 +38,7 @@ The code supports two types of workload:
 - Counting the qualifying records, or
 - XOR'ing between their ids
 
-You can switch between the two by appropriately setting the `WORKLOAD_COUNT` flag in def_global.h; remember to use `make clean` when changing the flag. 
+You can switch between the two by appropriately setting the `WORKLOAD_COUNT` flag in def_global.h; remember to use `make clean` after resetting the flag. 
 
 
 ## Indexing and query processing methods
