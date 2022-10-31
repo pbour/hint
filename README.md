@@ -174,5 +174,5 @@ Compile using ```make all``` or ```make <option>``` where `<option>` can be one 
 ## Notes / TODOs
 The following are missing from the current version of the code:
 - Model for automatically setting parameter "m" on HINT<sup>m</sup>
-- HINT and HINT+SS answering the basic predicates from Allen's algebra
+- HINT with SS optimization answering the basic predicates from Allen's algebra
 - Updates 
