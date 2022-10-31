@@ -29,8 +29,16 @@ Compile using ```make all``` or ```make <option>``` where `<option>` can be one 
 | ------ | ------ | ------ |
 | -? or -h | display help message | |
 | -v | activate verbose mode; print the trace for every query; otherwise only the final report is displayed | |
-| -q | set predicate type:<br>(1) basic relationships from Allen's algebra, "EQUALS", "STARTS", "STARTED", "FINISHES", "FINISHED", "MEETS", "MET", "OVERLAPS", "OVERLAPPED", "CONTAINS", "CONTAINED", "BEFORE" "AFTER"<br>(2) generalized overlaps, "gOVERLAPS", from ACM SIGMOD'22 publication  | basic predicates work only the linear scan method, 1dgrid and for the most advanced HINT<sup>m</sup> variants, with SUBS+SORT+SS+CM or ALL optimizations |
+| -q | set predicate type:<br>(1) basic relationships from Allen's algebra, "EQUALS", "STARTS", "STARTED", "FINISHES", "FINISHED", "MEETS", "MET", "OVERLAPS", "OVERLAPPED", "CONTAINS", "CONTAINED", "BEFORE" "AFTER"<br>(2) generalized overlaps, "gOVERLAPS", from ACM SIGMOD'22 publication  | basic predicates work only the linear scan method, 1D-grid and for the most advanced HINT<sup>m</sup> variants, with SUBS+SORT+SS+CM or ALL optimizations |
 | -r | set the number of runs per query; by default 1 |  |
+
+
+## Workloads
+The code supports two types of workload:
+- Counting the qualifying records
+- XOR'ing between their ids
+
+You can switch between the two by appropriately settings the `WORKLOAD_COUNT` flag in def_global.h; remember to use `make clean` when changing the flag. 
 
 
 ## Indexing and query processing methods
