@@ -29,7 +29,9 @@ Compile using ```make all``` or ```make <option>``` where `<option>` can be one 
 | ------ | ------ | ------ |
 | -? or -h | display help message | |
 | -v | activate verbose mode; print the trace for every query; otherwise only the final report | |
-| -q | set predicate type: "EQUALS" or "STARTS" or "STARTED" or "FINISHES" or "FINISHED" or "MEETS" or "MET" or "OVERLAPS" or "OVERLAPPED" or "CONTAINS" or "CONTAINED" or "BEFORE" or "AFTER" or "gOVERLAPS" | basic predicates of Allen's algebra; gOverlaps from ACM SIGMOD 2022 publication |
+| -q | set predicate type: 
+basic relationships from Allen's algebra, "EQUALS" or "STARTS" or "STARTED" or "FINISHES" or "FINISHED" or "MEETS" or "MET" or "OVERLAPS" or "OVERLAPPED" or "CONTAINS" or "CONTAINED" or "BEFORE" or "AFTER"
+generalized overlaps, "gOVERLAPS", from ACM SIGMOD'22 publication  | basic predicates from Allen's algebra; gOverlaps from ACM SIGMOD 2022 publication |
 | -r | set the number of runs per query; by default 1 |  |
 
 
@@ -173,5 +175,6 @@ Compile using ```make all``` or ```make <option>``` where `<option>` can be one 
 
 ## Notes / TODOs
 The following are missing from the current version of the code:
-- Updates
 - Model for automatically setting parameter "m" on HINT<sup>m</sup>
+- HINT and HINT+SS answering the basic predicates from Allen's algebra
+- Updates 
