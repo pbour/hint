@@ -45,10 +45,10 @@ Compile using ```make all``` or ```make <option>``` where `<option>` can be one 
 - ##### Examples
 
     ```sh
-    $ ./query_lscan.exec -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_lscan.exec -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ```sh
-    $ ./query_lscan.exec -q gOVERLAPS -v data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_lscan.exec -q gOVERLAPS -v samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
 
 
@@ -95,10 +95,10 @@ Compile using ```make all``` or ```make <option>``` where `<option>` can be one 
 - ##### Examples    
 
     ```sh
-    $ ./query_hint.exec -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint.exec -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ```sh
-    $ ./query_hint.exec -o SS -q gOVERLAPS -v data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint.exec -o SS -q gOVERLAPS -v samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
 
 
@@ -135,39 +135,39 @@ Compile using ```make all``` or ```make <option>``` where `<option>` can be one 
 
     ###### base with top-down
     ```sh
-    $ ./query_hint_m.exec -m 10 -t -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -t -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### base with bottom-up
     ```sh
-    $ ./query_hint_m.exec -m 10 -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -m 10 -o subs+sort -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sort -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sopt (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -m 10 -o subs+sopt -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sopt -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort+sopt (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort+sopt+ss (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt+ss -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt+ss -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort+sopt+cm (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt+cm -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt+cm -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort+ss+cm optimizations  (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt+cm -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt+cm -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### all optimizations  (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -m 10 -o all -q gOVERLAPS -r 10 data/AARHUS-BOOKS_2013.dat data/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o all -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
 
 
