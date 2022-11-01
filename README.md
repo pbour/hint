@@ -77,10 +77,10 @@ You can switch between the two by appropriately setting the `WORKLOAD_COUNT` fla
 - ##### Examples
 
     ```sh
-    $ ./query_1dgrid.exec -p 100 -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat AARHUS-BOOKS_2013_20k.qry
+    $ ./query_1dgrid.exec -p 100 -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ```sh
-    $ ./query_1dgrid.exec -p 300 -q gOVERLAPS -v samples/AARHUS-BOOKS_2013.dat AARHUS-BOOKS_2013_20k.qry
+    $ ./query_1dgrid.exec -p 300 -q gOVERLAPS -v samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
 
 
