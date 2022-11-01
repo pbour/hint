@@ -345,8 +345,7 @@ size_t HINT_M::executeTopDown_gOverlaps(RangeQuery Q)
 size_t HINT_M::executeBottomUp_gOverlaps(RangeQuery Q)
 {
     size_t result = 0;
-    Relation::iterator iterStart;
-    RelationIterator iter, iterEnd;
+    RelationIterator iter, iterStart, iterEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end   >> (this->maxBits-this->numBits); // prefix
     bool foundzero = false;
