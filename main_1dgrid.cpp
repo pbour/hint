@@ -52,8 +52,8 @@ void usage()
     cerr << "       -r runs" << endl;
     cerr << "              set the number of runs per query; by default 1" << endl << endl;
     cerr << "EXAMPLES" << endl;
-    cerr << "       ./query_1dgrid.exec -p 100 -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry" << endl;
-    cerr << "       ./query_1dgrid.exec -p 300 -q gOVERLAPS -v samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry" << endl << endl;
+    cerr << "       ./query_1dgrid.exec -p 500 -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry" << endl;
+    cerr << "       ./query_1dgrid.exec -p 500 -q gOVERLAPS -v samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry" << endl << endl;
 }
 
 
