@@ -282,7 +282,7 @@ HINT::~HINT()
 size_t HINT::execute_gOverlaps(StabbingQuery Q)
 {
     size_t result = 0;
-    RelationIdIterator iterEnd;
+    RelationIdIterator iter, iterBegin, iterEnd;
     Timestamp a = Q.point;
 
 
@@ -290,8 +290,9 @@ size_t HINT::execute_gOverlaps(StabbingQuery Q)
     for (auto l = 0; l < this->numBits; l++)
     {
         // Handle the partition that contains a.
+        iterBegin = this->pOrgs[l][a].begin();
         iterEnd = this->pOrgs[l][a].end();
-        for (RelationIdIterator iter = this->pOrgs[l][a].begin(); iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -300,8 +301,9 @@ size_t HINT::execute_gOverlaps(StabbingQuery Q)
 #endif
         }
         
+        iterBegin = this->pReps[l][a].begin();
         iterEnd = this->pReps[l][a].end();
-        for (RelationIdIterator iter = this->pReps[l][a].begin(); iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -314,8 +316,9 @@ size_t HINT::execute_gOverlaps(StabbingQuery Q)
     }
     
     // Handle root.
+    iterBegin = this->pOrgs[this->numBits][0].begin();
     iterEnd = this->pOrgs[this->numBits][0].end();
-    for (RelationIdIterator iter = this->pOrgs[this->numBits][0].begin(); iter != iterEnd; iter++)
+    for (iter = iterBegin; iter != iterEnd; iter++)
     {
 #ifdef WORKLOAD_COUNT
         result++;
@@ -332,26 +335,17 @@ size_t HINT::execute_gOverlaps(StabbingQuery Q)
 size_t HINT::execute_gOverlaps(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIdIterator iterEnd;
+    RelationIdIterator iter, iterBegin, iterEnd;
     Timestamp a = Q.start;
     Timestamp b = Q.end;
     
 
     for (auto l = 0; l < this->numBits; l++)
     {
-        // Handle the partition that contains a.
-        iterEnd = this->pOrgs[l][a].end();
-        for (RelationIdIterator iter = this->pOrgs[l][a].begin(); iter != iterEnd; iter++)
-        {
-#ifdef WORKLOAD_COUNT
-            result++;
-#else
-            result ^= (*iter);
-#endif
-        }
-        
+        // Handle the partition that contains a - only reps here.
+        iterBegin = this->pReps[l][a].begin();
         iterEnd = this->pReps[l][a].end();
-        for (RelationIdIterator iter = this->pReps[l][a].begin(); iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -360,11 +354,12 @@ size_t HINT::execute_gOverlaps(RangeQuery Q)
 #endif
         }
         
-        // Handle the rest up to the partition that contains b.
-        for (auto j = a+1; j <= b; j++)
+        // Handle the all relevant partitions.
+        for (auto j = a; j <= b; j++)
         {
+            iterBegin = this->pOrgs[l][j].begin();
             iterEnd = this->pOrgs[l][j].end();
-            for (RelationIdIterator iter = this->pOrgs[l][j].begin(); iter != iterEnd; iter++)
+            for (iter = iterBegin; iter != iterEnd; iter++)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
@@ -378,8 +373,9 @@ size_t HINT::execute_gOverlaps(RangeQuery Q)
     }
     
     // Handle root.
+    iterBegin = this->pOrgs[this->numBits][0].begin();
     iterEnd = this->pOrgs[this->numBits][0].end();
-    for (RelationIdIterator iter = this->pOrgs[this->numBits][0].begin(); iter != iterEnd; iter++)
+    for (iter = iterBegin; iter != iterEnd; iter++)
     {
 #ifdef WORKLOAD_COUNT
         result++;
@@ -642,7 +638,7 @@ HINT_SS::~HINT_SS()
 
 inline void HINT_SS::scanPartitions_Orgs_gOverlaps(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, size_t &result)
 {
-    RelationIdIterator iter, iterStart, iterEnd;
+    RelationIdIterator iter, iterBegin, iterEnd;
     tuple<Timestamp, RelationIdIterator, PartitionId> qdummyA, qdummyB;
     vector<tuple<Timestamp, RelationIdIterator, PartitionId> >::iterator iterIO, iterIO2, iterIOStart, iterIOEnd;
     size_t cnt = this->pOrgs_ioffsets[level].size();
@@ -665,7 +661,7 @@ inline void HINT_SS::scanPartitions_Orgs_gOverlaps(unsigned int level, Timestamp
                 next_from = get<2>(*iterIO);
                 
                 get<0>(qdummyB) = b;
-                iterStart = get<1>(*iterIO);
+                iterBegin = get<1>(*iterIO);
                 
                 iterIO2 = upper_bound(iterIO, iterIOEnd, qdummyB, Compare2);
 //                vector<tuple<Timestamp, RelationIdIterator, PartitionId> >::iterator  yo = upper_bound(iterIO, iterIOEnd, qdummyB, Compare2);
@@ -674,7 +670,7 @@ inline void HINT_SS::scanPartitions_Orgs_gOverlaps(unsigned int level, Timestamp
 //                    iterIO2++;
                 
                 iterEnd = ((iterIO2 != iterIOEnd) ? iterEnd = get<1>(*iterIO2): pOrgs[level].end());
-                for (iter = iterStart; iter != iterEnd; iter++)
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
@@ -723,9 +719,9 @@ inline void HINT_SS::scanPartitions_Orgs_gOverlaps(unsigned int level, Timestamp
             
             if ((from != cnt) && (from != -1) && (from < to))
             {
-                iterStart = get<1>(this->pOrgs_ioffsets[level][from]);
+                iterBegin = get<1>(this->pOrgs_ioffsets[level][from]);
                 iterEnd   = (to != cnt)? get<1>(this->pOrgs_ioffsets[level][to]): this->pOrgs[level].end();
-                for (iter = iterStart; iter != iterEnd; iter++)
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
@@ -751,7 +747,7 @@ inline void HINT_SS::scanPartitions_Orgs_gOverlaps(unsigned int level, Timestamp
 
 inline void HINT_SS::scanPartition_Reps_gOverlaps(unsigned int level, Timestamp t, PartitionId &next_from, size_t &result)
 {
-    RelationIdIterator iter, iterStart, iterEnd;
+    RelationIdIterator iter, iterBegin, iterEnd;
     tuple<Timestamp, RelationIdIterator, PartitionId> qdummy;
     vector<tuple<Timestamp, RelationIdIterator, PartitionId> >::iterator iterIO, iterIOStart, iterIOEnd;
     size_t cnt = this->pReps_ioffsets[level].size();
@@ -768,9 +764,9 @@ inline void HINT_SS::scanPartition_Reps_gOverlaps(unsigned int level, Timestamp 
             iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy, Compare2);
             if ((iterIO != iterIOEnd) && (get<0>(*iterIO) == t))
             {
-                iterStart = get<1>(*iterIO);
+                iterBegin = get<1>(*iterIO);
                 iterEnd = ((iterIO+1 != iterIOEnd) ? get<1>(*(iterIO+1)) : this->pReps[level].end());
-                for (iter = iterStart; iter != iterEnd; iter++)
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
@@ -800,9 +796,9 @@ inline void HINT_SS::scanPartition_Reps_gOverlaps(unsigned int level, Timestamp 
             
             if ((from != cnt) && (get<0>(this->pReps_ioffsets[level][from]) == t))
             {
-                iterStart = get<1>(this->pReps_ioffsets[level][from]);
+                iterBegin = get<1>(this->pReps_ioffsets[level][from]);
                 iterEnd = ((from+1 != cnt) ? get<1>(this->pReps_ioffsets[level][from+1]) : this->pReps[level].end());
-                for (iter = iterStart; iter != iterEnd; iter++)
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
@@ -825,7 +821,7 @@ inline void HINT_SS::scanPartition_Reps_gOverlaps(unsigned int level, Timestamp 
 size_t HINT_SS::execute_gOverlaps(StabbingQuery Q)
 {
     size_t result = 0;
-    RelationIdIterator iter, iterStart, iterEnd;
+    RelationIdIterator iter, iterBegin, iterEnd;
     Timestamp a = Q.point;
     tuple<Timestamp, RelationIdIterator, PartitionId> qdummyA;
     vector<tuple<Timestamp, RelationIdIterator, PartitionId> >::iterator iterIO, iterIOStart, iterIOEnd;
@@ -847,9 +843,9 @@ size_t HINT_SS::execute_gOverlaps(StabbingQuery Q)
                 iterIO = lower_bound(iterIOStart, iterIOEnd, qdummyA, Compare2);
                 if ((iterIO != iterIOEnd) && (get<0>(*iterIO) == a))
                 {
-                    iterStart = get<1>(*iterIO);
+                    iterBegin = get<1>(*iterIO);
                     iterEnd = ((iterIO+1 != iterIOEnd) ? get<1>(*(iterIO+1)) : this->pReps[l].end());
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -879,9 +875,9 @@ size_t HINT_SS::execute_gOverlaps(StabbingQuery Q)
                 
                 if ((fromR != cnt) && (get<0>(this->pReps_ioffsets[l][fromR]) == a))
                 {
-                    iterStart = get<1>(this->pReps_ioffsets[l][fromR]);
+                    iterBegin = get<1>(this->pReps_ioffsets[l][fromR]);
                     iterEnd = ((fromR+1 != cnt) ? get<1>(this->pReps_ioffsets[l][fromR+1]) : this->pReps[l].end());
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -910,9 +906,9 @@ size_t HINT_SS::execute_gOverlaps(StabbingQuery Q)
                 iterIO = lower_bound(iterIOStart, iterIOEnd, qdummyA, Compare2);
                 if ((iterIO != iterIOEnd) && (get<0>(*iterIO) == a))
                 {
-                    iterStart = get<1>(*iterIO);
+                    iterBegin = get<1>(*iterIO);
                     iterEnd = ((iterIO+1 != iterIOEnd) ? get<1>(*(iterIO+1)) : this->pOrgs[l].end());
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -942,9 +938,9 @@ size_t HINT_SS::execute_gOverlaps(StabbingQuery Q)
                 
                 if ((fromO != cnt) && (get<0>(this->pOrgs_ioffsets[l][fromO]) == a))
                 {
-                    iterStart = get<1>(this->pOrgs_ioffsets[l][fromO]);
+                    iterBegin = get<1>(this->pOrgs_ioffsets[l][fromO]);
                     iterEnd = ((fromO+1 != cnt) ? get<1>(this->pOrgs_ioffsets[l][fromO+1]) : this->pOrgs[l].end());
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -981,7 +977,7 @@ size_t HINT_SS::execute_gOverlaps(StabbingQuery Q)
 size_t HINT_SS::execute_gOverlaps(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIdIterator iter, iterStart, iterEnd;
+    RelationIdIterator iter, iterBegin, iterEnd;
     Timestamp a = Q.start;
     Timestamp b = Q.end;
     PartitionId fromO = -1, toO = -1, fromR = -1;
@@ -999,8 +995,9 @@ size_t HINT_SS::execute_gOverlaps(RangeQuery Q)
     }
     
     // Handle root
+    iterBegin = this->pOrgs[this->numBits].begin();
     iterEnd = this->pOrgs[this->numBits].end();
-    for (RelationIdIterator iter = this->pOrgs[this->numBits].begin(); iter != iterEnd; iter++)
+    for (iter = iterBegin; iter != iterEnd; iter++)
     {
 #ifdef WORKLOAD_COUNT
         result++;
