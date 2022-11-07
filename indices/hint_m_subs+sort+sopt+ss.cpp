@@ -427,7 +427,7 @@ HINT_M_SubsSortSopt_SS::~HINT_M_SubsSortSopt_SS()
 
 
 // Auxiliary functions to determine exactly how to scan a partition.
-inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsIn(unsigned int level, Timestamp t, PartitionId &next_from, RelationIterator &iterStart, RelationIterator &iterEnd)
+inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsIn(unsigned int level, Timestamp t, PartitionId &next_from, RelationIterator &iterBegin, RelationIterator &iterEnd)
 {
     OffsetEntry_SS_OrgsIn qdummy;
     Offsets_SS_OrgsIn_Iterator iterIO, iterIOStart, iterIOEnd;
@@ -446,7 +446,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsIn(unsigned int level, Timesta
             iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
-                iterStart = iterIO->iter;
+                iterBegin = iterIO->iter;
                 iterEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iter : this->pOrgsIn[level].end());
 
                 next_from = iterIO->pid;
@@ -472,7 +472,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsIn(unsigned int level, Timesta
 
             if ((from != cnt) && ((this->pOrgsIn_ioffsets[level][from]).tstamp == t))
             {
-                iterStart = (this->pOrgsIn_ioffsets[level][from]).iter;
+                iterBegin = (this->pOrgsIn_ioffsets[level][from]).iter;
                 iterEnd = ((from+1 != cnt) ? (this->pOrgsIn_ioffsets[level][from+1]).iter : this->pOrgsIn[level].end());
 
                 next_from = (this->pOrgsIn_ioffsets[level][from]).pid;
@@ -496,7 +496,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsIn(unsigned int level, Timesta
 }
 
 
-inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsIn(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, RelationIterator &iterStart, RelationIterator &iterEnd)
+inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsIn(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, RelationIterator &iterBegin, RelationIterator &iterEnd)
 {
     OffsetEntry_SS_OrgsIn qdummyA, qdummyB;
     Offsets_SS_OrgsIn_Iterator iterIO, iterIO2, iterIOStart, iterIOEnd;
@@ -521,7 +521,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsIn(unsigned int level, Timesta
                 next_from = iterIO->pid;
 
                 qdummyB.tstamp = b;
-                iterStart = iterIO->iter;
+                iterBegin = iterIO->iter;
 
                 iterIO2 = upper_bound(iterIO, iterIOEnd, qdummyB);
 //                iterIO2 = iterIO;
@@ -575,7 +575,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsIn(unsigned int level, Timesta
 
             if ((from != cnt) && (from != -1) && (from < to))
             {
-                iterStart = (this->pOrgsIn_ioffsets[level][from]).iter;
+                iterBegin = (this->pOrgsIn_ioffsets[level][from]).iter;
                 iterEnd   = (to != cnt)? (this->pOrgsIn_ioffsets[level][to]).iter: this->pOrgsIn[level].end();
 
                 next_from = (this->pOrgsIn_ioffsets[level][from]).pid;
@@ -601,7 +601,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsIn(unsigned int level, Timesta
 }
 
 
-inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsAft(unsigned int level, Timestamp t, PartitionId &next_from, RelationStartIterator &iterStart, RelationStartIterator &iterEnd)
+inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsAft(unsigned int level, Timestamp t, PartitionId &next_from, RelationStartIterator &iterBegin, RelationStartIterator &iterEnd)
 {
     OffsetEntry_SS_OrgsAft qdummy;
     Offsets_SS_OrgsAft_Iterator iterIO, iterIOStart, iterIOEnd;
@@ -620,7 +620,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsAft(unsigned int level, Timest
             iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareStartOffesetsByTimestamp);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
-                iterStart = iterIO->iter;
+                iterBegin = iterIO->iter;
                 iterEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iter : this->pOrgsAft[level].end());
 
                 next_from = iterIO->pid;
@@ -646,7 +646,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsAft(unsigned int level, Timest
 
             if ((from != cnt) && ((this->pOrgsAft_ioffsets[level][from]).tstamp == t))
             {
-                iterStart = (this->pOrgsAft_ioffsets[level][from]).iter;
+                iterBegin = (this->pOrgsAft_ioffsets[level][from]).iter;
                 iterEnd = ((from+1 != cnt) ? (this->pOrgsAft_ioffsets[level][from+1]).iter : this->pOrgsAft[level].end());
 
                 next_from = (this->pOrgsAft_ioffsets[level][from]).pid;
@@ -670,7 +670,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsAft(unsigned int level, Timest
 }
 
 
-inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsAft(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, RelationStartIterator &iterStart, RelationStartIterator &iterEnd)
+inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsAft(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, RelationStartIterator &iterBegin, RelationStartIterator &iterEnd)
 {
     OffsetEntry_SS_OrgsAft qdummyA, qdummyB;
     Offsets_SS_OrgsAft_Iterator iterIO, iterIO2, iterIOStart, iterIOEnd;
@@ -692,7 +692,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsAft(unsigned int level, Timest
                 next_from = iterIO->pid;
 
                 qdummyB.tstamp = b;
-                iterStart = iterIO->iter;
+                iterBegin = iterIO->iter;
 
                 iterIO2 = upper_bound(iterIO, iterIOEnd, qdummyB);//, CompareStartOffesetsByTimestamp);
 //                iterIO2 = iterIO;
@@ -746,7 +746,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsAft(unsigned int level, Timest
 
             if ((from != cnt) && (from != -1) && (from < to))
             {
-                iterStart = (this->pOrgsAft_ioffsets[level][from]).iter;
+                iterBegin = (this->pOrgsAft_ioffsets[level][from]).iter;
                 iterEnd   = (to != cnt)? (this->pOrgsAft_ioffsets[level][to]).iter: this->pOrgsAft[level].end();
 
                 next_from = (this->pOrgsAft_ioffsets[level][from]).pid;
@@ -772,7 +772,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_OrgsAft(unsigned int level, Timest
 }
 
 
-inline bool HINT_M_SubsSortSopt_SS::getBounds_RepsIn(unsigned int level, Timestamp t, PartitionId &next_from, RelationEndIterator &iterStart, RelationEndIterator &iterEnd)
+inline bool HINT_M_SubsSortSopt_SS::getBounds_RepsIn(unsigned int level, Timestamp t, PartitionId &next_from, RelationEndIterator &iterBegin, RelationEndIterator &iterEnd)
 {
     OffsetEntry_SS_RepsIn qdummy;
     Offsets_SS_RepsIn_Iterator iterIO, iterIOStart, iterIOEnd;
@@ -791,7 +791,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_RepsIn(unsigned int level, Timesta
             iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareEndOffesetsByTimestamp);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
-                iterStart = iterIO->iter;
+                iterBegin = iterIO->iter;
                 iterEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iter : this->pRepsIn[level].end());
 
                 next_from = iterIO->pid;
@@ -817,7 +817,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_RepsIn(unsigned int level, Timesta
 
             if ((from != cnt) && ((this->pRepsIn_ioffsets[level][from]).tstamp == t))
             {
-                iterStart = (this->pRepsIn_ioffsets[level][from]).iter;
+                iterBegin = (this->pRepsIn_ioffsets[level][from]).iter;
                 iterEnd = ((from+1 != cnt) ? (this->pRepsIn_ioffsets[level][from+1]).iter : this->pRepsIn[level].end());
 
                 next_from = (this->pRepsIn_ioffsets[level][from]).pid;
@@ -842,7 +842,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_RepsIn(unsigned int level, Timesta
     
 
 
-inline bool HINT_M_SubsSortSopt_SS::getBounds_RepsAft(unsigned int level, Timestamp t, PartitionId &next_from, RelationIdIterator &iterStart, RelationIdIterator &iterEnd)
+inline bool HINT_M_SubsSortSopt_SS::getBounds_RepsAft(unsigned int level, Timestamp t, PartitionId &next_from, RelationIdIterator &iterBegin, RelationIdIterator &iterEnd)
 {
     OffsetEntry_SS_RepsAft qdummy;
     Offsets_SS_RepsAft_Iterator iterIO, iterIOStart, iterIOEnd;
@@ -861,7 +861,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_RepsAft(unsigned int level, Timest
             iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareIdOffesetsByTimestamp);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
-                iterStart = iterIO->iter;
+                iterBegin = iterIO->iter;
                 iterEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iter : this->pRepsAft[level].end());
 
                 next_from = iterIO->pid;
@@ -887,7 +887,7 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_RepsAft(unsigned int level, Timest
 
             if ((from != cnt) && ((this->pRepsAft_ioffsets[level][from]).tstamp == t))
             {
-                iterStart = (this->pRepsAft_ioffsets[level][from]).iter;
+                iterBegin = (this->pRepsAft_ioffsets[level][from]).iter;
                 iterEnd = ((from+1 != cnt) ? (this->pRepsAft_ioffsets[level][from+1]).iter : this->pRepsAft[level].end());
 
                 next_from = (this->pRepsAft_ioffsets[level][from]).pid;
@@ -914,12 +914,12 @@ inline bool HINT_M_SubsSortSopt_SS::getBounds_RepsAft(unsigned int level, Timest
 // Auxiliary functions to scan a partition.
 inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_OrgsIn_gOverlaps(unsigned int level, Timestamp a, PartitionId &next_from, size_t &result)
 {
-    RelationIterator iter, iterStart, iterEnd;
+    RelationIterator iter, iterBegin, iterEnd;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -933,13 +933,13 @@ inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_OrgsIn_gOverlaps(unsigned
 
 inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_OrgsIn_gOverlaps(unsigned int level, Timestamp a, Timestamp qstart, Record qdummyE, PartitionId &next_from, size_t &result)
 {
-    RelationIterator iter, iterStart, iterEnd;
+    RelationIterator iter, iterBegin, iterEnd;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd))
     {
-        RelationIterator pivot = lower_bound(iterStart, iterEnd, qdummyE);
-        for (iter = iterStart; iter != pivot; iter++)
+        RelationIterator pivot = lower_bound(iterBegin, iterEnd, qdummyE);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (qstart <= iter->end)
             {
@@ -956,12 +956,12 @@ inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_OrgsIn_gOverlaps(unsigned
 
 inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_OrgsIn_gOverlaps(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, size_t &result)
 {
-    RelationIterator iter, iterStart, iterEnd;
+    RelationIterator iter, iterBegin, iterEnd;
 
     
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qstart <= iter->end)
             {
@@ -978,12 +978,12 @@ inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_OrgsIn_gOverlaps(unsigned
 
 inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_OrgsAft_gOverlaps(unsigned int level, Timestamp a, PartitionId &next_from, size_t &result)
 {
-    RelationStartIterator iter, iterStart, iterEnd;
+    RelationStartIterator iter, iterBegin, iterEnd;
 
     
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -997,12 +997,12 @@ inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_OrgsAft_gOverlaps(unsigne
 
 inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_RepsIn_gOverlaps(unsigned int level, Timestamp a, PartitionId &next_from, size_t &result)
 {
-    RelationEndIterator iter, iterStart, iterEnd;
+    RelationEndIterator iter, iterBegin, iterEnd;
 
 
-    if (this->getBounds_RepsIn(level, a, next_from, iterStart, iterEnd))
+    if (this->getBounds_RepsIn(level, a, next_from, iterBegin, iterEnd))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1016,12 +1016,12 @@ inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_RepsIn_gOverlaps(unsigned
 
 inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_RepsIn_gOverlaps(unsigned int level, Timestamp a, RecordEnd qdummyS, PartitionId &next_from, size_t &result)
 {
-    RelationEndIterator iter, iterStart, iterEnd;
+    RelationEndIterator iter, iterBegin, iterEnd;
 
 
-    if (this->getBounds_RepsIn(level, a, next_from, iterStart, iterEnd))
+    if (this->getBounds_RepsIn(level, a, next_from, iterBegin, iterEnd))
     {
-        RelationEndIterator pivot = lower_bound(iterStart, iterEnd, qdummyS);
+        RelationEndIterator pivot = lower_bound(iterBegin, iterEnd, qdummyS);
         for (iter = pivot; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
@@ -1036,12 +1036,12 @@ inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_RepsIn_gOverlaps(unsigned
 
 inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_RepsAft_gOverlaps(unsigned int level, Timestamp a, PartitionId &next_from, size_t &result)
 {
-    RelationIdIterator iter, iterStart, iterEnd;
+    RelationIdIterator iter, iterBegin, iterEnd;
 
 
-    if (this->getBounds_RepsAft(level, a, next_from, iterStart, iterEnd))
+    if (this->getBounds_RepsAft(level, a, next_from, iterBegin, iterEnd))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1055,13 +1055,13 @@ inline void HINT_M_SubsSortSopt_SS::scanFirstPartition_RepsAft_gOverlaps(unsigne
 
 inline void HINT_M_SubsSortSopt_SS::scanLastPartition_OrgsIn_gOverlaps(unsigned int level, Timestamp b, Record qdummyE, PartitionId &next_from, size_t &result)
 {
-    RelationIterator iter, iterStart, iterEnd;
+    RelationIterator iter, iterBegin, iterEnd;
 
 
-    if (this->getBounds_OrgsIn(level, b, next_from, iterStart, iterEnd))
+    if (this->getBounds_OrgsIn(level, b, next_from, iterBegin, iterEnd))
     {
-        RelationIterator pivot = lower_bound(iterStart, iterEnd, qdummyE);
-        for (iter = iterStart; iter != pivot; iter++)
+        RelationIterator pivot = lower_bound(iterBegin, iterEnd, qdummyE);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1075,13 +1075,13 @@ inline void HINT_M_SubsSortSopt_SS::scanLastPartition_OrgsIn_gOverlaps(unsigned 
 
 inline void HINT_M_SubsSortSopt_SS::scanLastPartition_OrgsAft_gOverlaps(unsigned int level, Timestamp b, RecordStart qdummySE, PartitionId &next_from, size_t &result)
 {
-    RelationStartIterator iter, iterStart, iterEnd;
+    RelationStartIterator iter, iterBegin, iterEnd;
 
 
-    if (this->getBounds_OrgsAft(level, b, next_from, iterStart, iterEnd))
+    if (this->getBounds_OrgsAft(level, b, next_from, iterBegin, iterEnd))
     {
-        RelationStartIterator pivot = lower_bound(iterStart, iterEnd, qdummySE);
-        for (iter = iterStart; iter != pivot; iter++)
+        RelationStartIterator pivot = lower_bound(iterBegin, iterEnd, qdummySE);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1095,12 +1095,12 @@ inline void HINT_M_SubsSortSopt_SS::scanLastPartition_OrgsAft_gOverlaps(unsigned
 
 inline void HINT_M_SubsSortSopt_SS::scanPartitions_OrgsIn_gOverlaps(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, size_t &result)
 {
-    RelationIterator iter, iterStart, iterEnd;
+    RelationIterator iter, iterBegin, iterEnd;
 
     
-    if (this->getBounds_OrgsIn(level, a, b, next_from, next_to, iterStart, iterEnd))
+    if (this->getBounds_OrgsIn(level, a, b, next_from, next_to, iterBegin, iterEnd))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1114,12 +1114,12 @@ inline void HINT_M_SubsSortSopt_SS::scanPartitions_OrgsIn_gOverlaps(unsigned int
 
 inline void HINT_M_SubsSortSopt_SS::scanPartitions_OrgsAft_gOverlaps(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, size_t &result)
 {
-    RelationStartIterator iter, iterStart, iterEnd;
+    RelationStartIterator iter, iterBegin, iterEnd;
 
     
-    if (this->getBounds_OrgsAft(level, a, b, next_from, next_to, iterStart, iterEnd))
+    if (this->getBounds_OrgsAft(level, a, b, next_from, next_to, iterBegin, iterEnd))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1135,11 +1135,8 @@ inline void HINT_M_SubsSortSopt_SS::scanPartitions_OrgsAft_gOverlaps(unsigned in
 size_t HINT_M_SubsSortSopt_SS::executeBottomUp_gOverlaps(RangeQuery Q)
 {
     size_t result = 0;
-    Relation::iterator iterStart;
+    Relation::iterator iterBegin;
     RelationIterator iter, iterEnd;
-    RelationStart::iterator iterSStart, iterSEnd;
-    RelationEnd::iterator iterEStart, iterEEnd;
-    RelationIdIterator iterIStart, iterIEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end   >> (this->maxBits-this->numBits); // prefix
     Record qdummyE(0, Q.end+1, Q.end+1);
@@ -1210,9 +1207,9 @@ size_t HINT_M_SubsSortSopt_SS::executeBottomUp_gOverlaps(RangeQuery Q)
     if (foundone && foundzero)
     {
         // All contents are guaranteed to be results
-        iterStart = this->pOrgsIn[this->numBits].begin();
+        iterBegin = this->pOrgsIn[this->numBits].begin();
         iterEnd = this->pOrgsIn[this->numBits].end();
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1224,9 +1221,9 @@ size_t HINT_M_SubsSortSopt_SS::executeBottomUp_gOverlaps(RangeQuery Q)
     else
     {
         // Comparisons needed
-        iterStart = this->pOrgsIn[this->numBits].begin();
-        iterEnd = lower_bound(iterStart, this->pOrgsIn[this->numBits].end(), qdummyE);
-        for (iter = iterStart; iter != iterEnd; iter++)
+        iterBegin = this->pOrgsIn[this->numBits].begin();
+        iterEnd = lower_bound(iterBegin, this->pOrgsIn[this->numBits].end(), qdummyE);
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (Q.start <= iter->end)
             {

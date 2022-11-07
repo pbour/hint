@@ -177,7 +177,7 @@ HINT_M_ALL::HINT_M_ALL(const Relation &R, const unsigned int numBits, const unsi
     Offsets_ALL_OrgsIn_Iterator  iterSEO, iterSEOStart, iterSEOEnd;
     Offsets_ALL_OrgsAft_Iterator iterSO, iterSOStart, iterSOEnd;
     Offsets_ALL_RepsIn_Iterator  iterEO, iterEOStart, iterEOEnd;
-    Offsets_ALL_RepsAft_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_ALL_RepsAft_Iterator iterIO, iterIOBegin, iterIOEnd;
     PartitionId tmp = -1;
     
     
@@ -414,10 +414,10 @@ HINT_M_ALL::HINT_M_ALL(const Relation &R, const unsigned int numBits, const unsi
                 tmp = -1;
                 if (l < this->height-1)
                 {
-                    iterIOStart = this->pRepsAft_ioffsets[l+1].begin();
+                    iterIOBegin = this->pRepsAft_ioffsets[l+1].begin();
                     iterIOEnd = this->pRepsAft_ioffsets[l+1].end();
-                    iterIO = lower_bound(iterIOStart, iterIOEnd, dummyI);//, CompareIdOffesetsByTimestamp);
-                    tmp = (iterIO != iterIOEnd)? (iterIO-iterIOStart): -1;
+                    iterIO = lower_bound(iterIOBegin, iterIOEnd, dummyI);//, CompareIdOffesetsByTimestamp);
+                    tmp = (iterIO != iterIOEnd)? (iterIO-iterIOBegin): -1;
                 }
                 this->pRepsAft_ioffsets[l].push_back(OffsetEntry_ALL_RepsAft(pId, this->pRepsAft[l].begin()+sumRaft, tmp));
             }
@@ -485,10 +485,10 @@ HINT_M_ALL::~HINT_M_ALL()
 
 
 // Auxiliary functions to determine exactly how to scan a partition.
-inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp t, PartitionId &next_from, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd)
+inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp t, PartitionId &next_from, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd)
 {
     OffsetEntry_ALL_OrgsIn qdummy;
-    Offsets_ALL_OrgsIn_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_ALL_OrgsIn_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pOrgsIn_ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -498,12 +498,12 @@ inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp t, Partit
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = this->pOrgsIn_ioffsets[level].begin();
+            iterIOBegin = this->pOrgsIn_ioffsets[level].begin();
             iterIOEnd = this->pOrgsIn_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareStartEndOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareStartEndOffesetsByTimestamp_WithCM);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
-                iterIStart = iterIO->iterI;
+                iterIBegin = iterIO->iterI;
                 iterIEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterI : this->pOrgsInIds[level].end());
 
                 next_from = iterIO->pid;
@@ -531,7 +531,7 @@ inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp t, Partit
 
             if ((from != cnt) && ((this->pOrgsIn_ioffsets[level][from]).tstamp == t))
             {
-                iterIStart = (this->pOrgsIn_ioffsets[level][from]).iterI;
+                iterIBegin = (this->pOrgsIn_ioffsets[level][from]).iterI;
                 iterIEnd = ((from+1 != cnt) ? (this->pOrgsIn_ioffsets[level][from+1]).iterI : this->pOrgsInIds[level].end());
 
                 next_from = (this->pOrgsIn_ioffsets[level][from]).pid;
@@ -555,10 +555,10 @@ inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp t, Partit
 }
 
 
-inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp t, PartitionId &next_from, vector<pair<Timestamp, Timestamp> >::iterator &iterStart, vector<pair<Timestamp, Timestamp> >::iterator &iterEnd, RelationIdIterator &iterI)
+inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp t, PartitionId &next_from, vector<pair<Timestamp, Timestamp> >::iterator &iterBegin, vector<pair<Timestamp, Timestamp> >::iterator &iterEnd, RelationIdIterator &iterI)
 {
     OffsetEntry_ALL_OrgsIn qdummy;
-    Offsets_ALL_OrgsIn_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_ALL_OrgsIn_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pOrgsIn_ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -569,13 +569,13 @@ inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp t, Partit
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = this->pOrgsIn_ioffsets[level].begin();
+            iterIOBegin = this->pOrgsIn_ioffsets[level].begin();
             iterIOEnd = this->pOrgsIn_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareStartEndOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareStartEndOffesetsByTimestamp_WithCM);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
                 iterI = iterIO->iterI;
-                iterStart = iterIO->iterT;
+                iterBegin = iterIO->iterT;
                 iterEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterT : this->pOrgsInTimestamps[level].end());
 
                 next_from = iterIO->pid;
@@ -604,7 +604,7 @@ inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp t, Partit
                 if ((from != cnt) && ((this->pOrgsIn_ioffsets[level][from]).tstamp == t))
             {
                 iterI = (this->pOrgsIn_ioffsets[level][from]).iterI;
-                iterStart = (this->pOrgsIn_ioffsets[level][from]).iterT;
+                iterBegin = (this->pOrgsIn_ioffsets[level][from]).iterT;
                 iterEnd = ((from+1 != cnt) ? (this->pOrgsIn_ioffsets[level][from+1]).iterT : this->pOrgsInTimestamps[level].end());
 
                 next_from = (this->pOrgsIn_ioffsets[level][from]).pid;
@@ -628,10 +628,10 @@ inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp t, Partit
 }
 
 
-inline bool HINT_M_ALL::getBoundsS_OrgsIn(unsigned int level, Timestamp t, PartitionId &next_from, vector<pair<Timestamp, Timestamp> >::iterator &iterStart, RelationIdIterator &iterI)
+inline bool HINT_M_ALL::getBoundsS_OrgsIn(unsigned int level, Timestamp t, PartitionId &next_from, vector<pair<Timestamp, Timestamp> >::iterator &iterBegin, RelationIdIterator &iterI)
 {
     OffsetEntry_ALL_OrgsIn qdummy;
-    Offsets_ALL_OrgsIn_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_ALL_OrgsIn_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pOrgsIn_ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -642,14 +642,14 @@ inline bool HINT_M_ALL::getBoundsS_OrgsIn(unsigned int level, Timestamp t, Parti
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = this->pOrgsIn_ioffsets[level].begin();
+            iterIOBegin = this->pOrgsIn_ioffsets[level].begin();
             iterIOEnd = this->pOrgsIn_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareStartEndOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareStartEndOffesetsByTimestamp_WithCM);
 //            if ((iterIO != iterIOEnd) && (get<0>(this->pOrgsIn_ioffsets[level][from]) >= t))
             if (iterIO != iterIOEnd)
             {
                 iterI = iterIO->iterI;
-                iterStart = iterIO->iterT;
+                iterBegin = iterIO->iterT;
 
                 next_from = iterIO->pid;
 
@@ -677,7 +677,7 @@ inline bool HINT_M_ALL::getBoundsS_OrgsIn(unsigned int level, Timestamp t, Parti
             if ((from != cnt) && (from != -1))
             {
                 iterI = (this->pOrgsIn_ioffsets[level][from]).iterI;
-                iterStart = (this->pOrgsIn_ioffsets[level][from]).iterT;
+                iterBegin = (this->pOrgsIn_ioffsets[level][from]).iterT;
 
                 next_from = (this->pOrgsIn_ioffsets[level][from]).pid;
 
@@ -703,7 +703,7 @@ inline bool HINT_M_ALL::getBoundsS_OrgsIn(unsigned int level, Timestamp t, Parti
 inline bool HINT_M_ALL::getBoundsE_OrgsIn(unsigned int level, Timestamp t, PartitionId &next_from, vector<pair<Timestamp, Timestamp> >::iterator &iterEnd, RelationIdIterator &iterI)
 {
     OffsetEntry_ALL_OrgsIn qdummy;
-    Offsets_ALL_OrgsIn_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_ALL_OrgsIn_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pOrgsIn_ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -714,9 +714,9 @@ inline bool HINT_M_ALL::getBoundsE_OrgsIn(unsigned int level, Timestamp t, Parti
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = this->pOrgsIn_ioffsets[level].begin();
+            iterIOBegin = this->pOrgsIn_ioffsets[level].begin();
             iterIOEnd = this->pOrgsIn_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareStartEndOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareStartEndOffesetsByTimestamp_WithCM);
             iterIO--;
             if ((iterIO != iterIOEnd) && (iterIO->tstamp <= t))
             {
@@ -773,10 +773,10 @@ inline bool HINT_M_ALL::getBoundsE_OrgsIn(unsigned int level, Timestamp t, Parti
 }
 
 
-inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd)
+inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd)
 {
     OffsetEntry_ALL_OrgsIn qdummyA, qdummyB;
-    Offsets_ALL_OrgsIn_Iterator iterIO, iterIO2, iterIOStart, iterIOEnd;
+    Offsets_ALL_OrgsIn_Iterator iterIO, iterIO2, iterIOBegin, iterIOEnd;
     size_t cnt = this->pOrgsIn_ioffsets[level].size();
     PartitionId from = next_from, to = next_to;
 
@@ -790,15 +790,15 @@ inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp a, Timest
         if ((from == -1) || (to == -1))
         {
             qdummyA.tstamp = a;
-            iterIOStart = this->pOrgsIn_ioffsets[level].begin();
+            iterIOBegin = this->pOrgsIn_ioffsets[level].begin();
             iterIOEnd = this->pOrgsIn_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummyA);//, CompareStartEndOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummyA);//, CompareStartEndOffesetsByTimestamp_WithCM);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp <= b))
             {
                 next_from = iterIO->pid;
 
                 qdummyB.tstamp = b;
-                iterIStart = iterIO->iterI;
+                iterIBegin = iterIO->iterI;
 
                 iterIO2 = upper_bound(iterIO, iterIOEnd, qdummyB);//, CompareStartEndOffesetsByTimestamp_WithCM);
 //                iterIO2 = iterIO;
@@ -853,7 +853,7 @@ inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp a, Timest
 
             if ((from != cnt) && (from != -1) && (from < to))
             {
-                iterIStart = (this->pOrgsIn_ioffsets[level][from]).iterI;
+                iterIBegin = (this->pOrgsIn_ioffsets[level][from]).iterI;
                 iterIEnd   = (to != cnt) ? (this->pOrgsIn_ioffsets[level][to]).iterI : this->pOrgsInIds[level].end();
 
                 next_from = (this->pOrgsIn_ioffsets[level][from]).pid;
@@ -880,10 +880,10 @@ inline bool HINT_M_ALL::getBounds_OrgsIn(unsigned int level, Timestamp a, Timest
 }
 
 
-inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp t, PartitionId &next_from, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd)
+inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp t, PartitionId &next_from, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd)
 {
     OffsetEntry_ALL_OrgsAft qdummy;
-    Offsets_ALL_OrgsAft_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_ALL_OrgsAft_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pOrgsAft_ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -893,12 +893,12 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp t, Parti
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = this->pOrgsAft_ioffsets[level].begin();
+            iterIOBegin = this->pOrgsAft_ioffsets[level].begin();
             iterIOEnd = this->pOrgsAft_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareStartOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareStartOffesetsByTimestamp_WithCM);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
-                iterIStart = iterIO->iterI;
+                iterIBegin = iterIO->iterI;
                 iterIEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterI : this->pOrgsAftIds[level].end());
 
                 next_from = iterIO->pid;
@@ -926,7 +926,7 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp t, Parti
 
             if ((from != cnt) && ((this->pOrgsAft_ioffsets[level][from]).tstamp == t))
             {
-                iterIStart = (this->pOrgsAft_ioffsets[level][from]).iterI;
+                iterIBegin = (this->pOrgsAft_ioffsets[level][from]).iterI;
                 iterIEnd = ((from+1 != cnt) ? (this->pOrgsAft_ioffsets[level][from+1]).iterI : this->pOrgsAftIds[level].end());
 
                 next_from = (this->pOrgsAft_ioffsets[level][from]).pid;
@@ -950,10 +950,10 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp t, Parti
 }
 
 
-inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp t, PartitionId &next_from, vector<Timestamp>::iterator &iterStart, vector<Timestamp>::iterator &iterEnd, RelationIdIterator &iterI)
+inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp t, PartitionId &next_from, vector<Timestamp>::iterator &iterBegin, vector<Timestamp>::iterator &iterEnd, RelationIdIterator &iterI)
 {
     OffsetEntry_ALL_OrgsAft qdummy;
-    Offsets_ALL_OrgsAft_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_ALL_OrgsAft_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pOrgsAft_ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -963,13 +963,13 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp t, Parti
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = this->pOrgsAft_ioffsets[level].begin();
+            iterIOBegin = this->pOrgsAft_ioffsets[level].begin();
             iterIOEnd = this->pOrgsAft_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareStartOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareStartOffesetsByTimestamp_WithCM);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
                 iterI = iterIO->iterI;
-                iterStart = iterIO->iterT;
+                iterBegin = iterIO->iterT;
                 iterEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterT : this->pOrgsAftTimestamp[level].end());
 
                 next_from = iterIO->pid;
@@ -998,7 +998,7 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp t, Parti
             if ((from != cnt) && ((this->pOrgsAft_ioffsets[level][from]).tstamp == t))
             {
                 iterI = (this->pOrgsAft_ioffsets[level][from]).iterI;
-                iterStart = (this->pOrgsAft_ioffsets[level][from]).iterT;
+                iterBegin = (this->pOrgsAft_ioffsets[level][from]).iterT;
                 iterEnd = ((from+1 != cnt) ? (this->pOrgsAft_ioffsets[level][from+1]).iterT : this->pOrgsAftTimestamp[level].end());
 
                 next_from = (this->pOrgsAft_ioffsets[level][from]).pid;
@@ -1022,10 +1022,10 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp t, Parti
 }
 
 
-inline bool HINT_M_ALL::getBoundsS_OrgsAft(unsigned int level, Timestamp t, PartitionId &next_from, vector<Timestamp>::iterator &iterStart, RelationIdIterator &iterI)
+inline bool HINT_M_ALL::getBoundsS_OrgsAft(unsigned int level, Timestamp t, PartitionId &next_from, vector<Timestamp>::iterator &iterBegin, RelationIdIterator &iterI)
 {
     OffsetEntry_ALL_OrgsAft qdummy;
-    Offsets_ALL_OrgsAft_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_ALL_OrgsAft_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pOrgsAft_ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -1036,14 +1036,14 @@ inline bool HINT_M_ALL::getBoundsS_OrgsAft(unsigned int level, Timestamp t, Part
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = this->pOrgsAft_ioffsets[level].begin();
+            iterIOBegin = this->pOrgsAft_ioffsets[level].begin();
             iterIOEnd = this->pOrgsAft_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareStartOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareStartOffesetsByTimestamp_WithCM);
 //            if ((iterIO != iterIOEnd) && (get<0>(this->pOrgsAft_ioffsets[level][from]) >= t))
             if (iterIO != iterIOEnd)
             {
                 iterI = iterIO->iterI;
-                iterStart = iterIO->iterT;
+                iterBegin = iterIO->iterT;
 
                 next_from = iterIO->pid;
 
@@ -1071,7 +1071,7 @@ inline bool HINT_M_ALL::getBoundsS_OrgsAft(unsigned int level, Timestamp t, Part
             if ((from != cnt) && (from != -1))
             {
                 iterI = (this->pOrgsAft_ioffsets[level][from]).iterI;
-                iterStart = (this->pOrgsAft_ioffsets[level][from]).iterT;
+                iterBegin = (this->pOrgsAft_ioffsets[level][from]).iterT;
 
                 next_from = (this->pOrgsAft_ioffsets[level][from]).pid;
 
@@ -1094,10 +1094,10 @@ inline bool HINT_M_ALL::getBoundsS_OrgsAft(unsigned int level, Timestamp t, Part
 }
 
 
-inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd)
+inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd)
 {
     OffsetEntry_ALL_OrgsAft qdummyA, qdummyB;
-    Offsets_ALL_OrgsAft_Iterator iterIO, iterIO2, iterIOStart, iterIOEnd;
+    Offsets_ALL_OrgsAft_Iterator iterIO, iterIO2, iterIOBegin, iterIOEnd;
     size_t cnt = this->pOrgsAft_ioffsets[level].size();
     PartitionId from = next_from, to = next_to;
 
@@ -1108,15 +1108,15 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp a, Times
         if ((from == -1) || (to == -1))
         {
             qdummyA.tstamp = a;
-            iterIOStart = this->pOrgsAft_ioffsets[level].begin();
+            iterIOBegin = this->pOrgsAft_ioffsets[level].begin();
             iterIOEnd = this->pOrgsAft_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummyA);//, CompareStartOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummyA);//, CompareStartOffesetsByTimestamp_WithCM);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp <= b))
             {
                 next_from = iterIO->pid;
 
                 qdummyB.tstamp = b;
-                iterIStart = iterIO->iterI;
+                iterIBegin = iterIO->iterI;
 
                 iterIO2 = upper_bound(iterIO, iterIOEnd, qdummyB);//, CompareStartOffesetsByTimestamp_WithCM);
 //                iterIO2 = iterIO;
@@ -1171,7 +1171,7 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp a, Times
 
             if ((from != cnt) && (from != -1) && (from < to))
             {
-                iterIStart = (this->pOrgsAft_ioffsets[level][from]).iterI;
+                iterIBegin = (this->pOrgsAft_ioffsets[level][from]).iterI;
                 iterIEnd   = (to != cnt) ? (this->pOrgsAft_ioffsets[level][to]).iterI : this->pOrgsAftIds[level].end();
 
                 next_from = (this->pOrgsAft_ioffsets[level][from]).pid;
@@ -1197,10 +1197,10 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp a, Times
 }
 
 
-inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, vector<Timestamp>::iterator &iterStart, vector<Timestamp>::iterator &iterEnd, RelationIdIterator &iterI)
+inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, vector<Timestamp>::iterator &iterBegin, vector<Timestamp>::iterator &iterEnd, RelationIdIterator &iterI)
 {
     OffsetEntry_ALL_OrgsAft qdummyA, qdummyB;
-    Offsets_ALL_OrgsAft_Iterator iterIO, iterIO2, iterIOStart, iterIOEnd;
+    Offsets_ALL_OrgsAft_Iterator iterIO, iterIO2, iterIOBegin, iterIOEnd;
     size_t cnt = this->pOrgsAft_ioffsets[level].size();
     PartitionId from = next_from, to = next_to;
 
@@ -1211,16 +1211,16 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp a, Times
         if ((from == -1) || (to == -1))
         {
             qdummyA.tstamp = a;
-            iterIOStart = this->pOrgsAft_ioffsets[level].begin();
+            iterIOBegin = this->pOrgsAft_ioffsets[level].begin();
             iterIOEnd = this->pOrgsAft_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummyA);//, CompareStartOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummyA);//, CompareStartOffesetsByTimestamp_WithCM);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp <= b))
             {
                 next_from = iterIO->pid;
 
                 qdummyB.tstamp = b;
                 iterI = iterIO->iterI;
-                iterStart = iterIO->iterT;
+                iterBegin = iterIO->iterT;
 
                 iterIO2 = upper_bound(iterIO, iterIOEnd, qdummyB);//, CompareStartOffesetsByTimestamp_WithCM);
 //                iterIO2 = iterIO;
@@ -1276,7 +1276,7 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp a, Times
             if ((from != cnt) && (from != -1) && (from < to))
             {
                 iterI = (this->pOrgsAft_ioffsets[level][from]).iterI;
-                iterStart = (this->pOrgsAft_ioffsets[level][from]).iterT;
+                iterBegin = (this->pOrgsAft_ioffsets[level][from]).iterT;
                 iterEnd   = (to != cnt) ? (this->pOrgsAft_ioffsets[level][to]).iterT : this->pOrgsAftTimestamp[level].end();
 
                 next_from = (this->pOrgsAft_ioffsets[level][from]).pid;
@@ -1302,10 +1302,10 @@ inline bool HINT_M_ALL::getBounds_OrgsAft(unsigned int level, Timestamp a, Times
 }
 
 
-inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp t, PartitionId &next_from, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd)
+inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp t, PartitionId &next_from, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd)
 {
     OffsetEntry_ALL_RepsIn qdummy;
-    Offsets_ALL_RepsIn_Iterator iterIO, iterIO2, iterIOStart, iterIOEnd;
+    Offsets_ALL_RepsIn_Iterator iterIO, iterIO2, iterIOBegin, iterIOEnd;
     size_t cnt = this->pRepsIn_ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -1316,12 +1316,12 @@ inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp t, Partit
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = this->pRepsIn_ioffsets[level].begin();
+            iterIOBegin = this->pRepsIn_ioffsets[level].begin();
             iterIOEnd = this->pRepsIn_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareStartOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareStartOffesetsByTimestamp_WithCM);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
-                iterIStart = iterIO->iterI;
+                iterIBegin = iterIO->iterI;
                 iterIEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterI : this->pRepsInIds[level].end());
 
                 next_from = iterIO->pid;
@@ -1349,7 +1349,7 @@ inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp t, Partit
 
             if ((from != cnt) && ((this->pRepsIn_ioffsets[level][from]).tstamp == t))
             {
-                iterIStart = (this->pRepsIn_ioffsets[level][from]).iterI;
+                iterIBegin = (this->pRepsIn_ioffsets[level][from]).iterI;
                 iterIEnd = ((from+1 != cnt) ? (this->pRepsIn_ioffsets[level][from+1]).iterI : this->pRepsInIds[level].end());
 
                 next_from = (this->pRepsIn_ioffsets[level][from]).pid;
@@ -1372,10 +1372,10 @@ inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp t, Partit
 }
 
 
-inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp t, PartitionId &next_from, vector<Timestamp>::iterator &iterStart, vector<Timestamp>::iterator  &iterEnd, RelationIdIterator &iterI)
+inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp t, PartitionId &next_from, vector<Timestamp>::iterator &iterBegin, vector<Timestamp>::iterator  &iterEnd, RelationIdIterator &iterI)
 {
     OffsetEntry_ALL_RepsIn qdummy;
-    Offsets_ALL_RepsIn_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_ALL_RepsIn_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pRepsIn_ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -1386,13 +1386,13 @@ inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp t, Partit
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = this->pRepsIn_ioffsets[level].begin();
+            iterIOBegin = this->pRepsIn_ioffsets[level].begin();
             iterIOEnd = this->pRepsIn_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareEndOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareEndOffesetsByTimestamp_WithCM);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
                 iterI = iterIO->iterI;
-                iterStart = iterIO->iterT;
+                iterBegin = iterIO->iterT;
                 iterEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterT : this->pRepsInTimestamp[level].end());
 
                 next_from = iterIO->pid;
@@ -1421,7 +1421,7 @@ inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp t, Partit
             if ((from != cnt) && ((this->pRepsIn_ioffsets[level][from]).tstamp == t))
             {
                 iterI = (this->pRepsIn_ioffsets[level][from]).iterI;
-                iterStart = (this->pRepsIn_ioffsets[level][from]).iterT;
+                iterBegin = (this->pRepsIn_ioffsets[level][from]).iterT;
                 iterEnd = ((from+1 != cnt) ? (this->pRepsIn_ioffsets[level][from+1]).iterT : this->pRepsInTimestamp[level].end());
 
                 next_from = (this->pRepsIn_ioffsets[level][from]).pid;
@@ -1448,7 +1448,7 @@ inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp t, Partit
 inline bool HINT_M_ALL::getBoundsE_RepsIn(unsigned int level, Timestamp t, PartitionId &next_from, vector<Timestamp>::iterator &iterEnd, RelationIdIterator &iterI)
 {
     OffsetEntry_ALL_RepsIn qdummy;
-    Offsets_ALL_RepsIn_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_ALL_RepsIn_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pRepsIn_ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -1459,9 +1459,9 @@ inline bool HINT_M_ALL::getBoundsE_RepsIn(unsigned int level, Timestamp t, Parti
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = this->pRepsIn_ioffsets[level].begin();
+            iterIOBegin = this->pRepsIn_ioffsets[level].begin();
             iterIOEnd = this->pRepsIn_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareEndOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareEndOffesetsByTimestamp_WithCM);
             iterIO--;
             if ((iterIO != iterIOEnd) && (iterIO->tstamp <= t))
             {
@@ -1518,10 +1518,10 @@ inline bool HINT_M_ALL::getBoundsE_RepsIn(unsigned int level, Timestamp t, Parti
 }
 
 
-inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd)
+inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd)
 {
     OffsetEntry_ALL_RepsIn qdummyA, qdummyB;
-    Offsets_ALL_RepsIn_Iterator iterIO, iterIO2, iterIOStart, iterIOEnd;
+    Offsets_ALL_RepsIn_Iterator iterIO, iterIO2, iterIOBegin, iterIOEnd;
     size_t cnt = this->pRepsIn_ioffsets[level].size();
     PartitionId from = next_from, to = next_to;
 
@@ -1532,15 +1532,15 @@ inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp a, Timest
         if ((from == -1) || (to == -1))
         {
             qdummyA.tstamp = a;
-            iterIOStart = this->pRepsIn_ioffsets[level].begin();
+            iterIOBegin = this->pRepsIn_ioffsets[level].begin();
             iterIOEnd = this->pRepsIn_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummyA);//, CompareStartOffesetsByTimestamp_WithCM);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummyA);//, CompareStartOffesetsByTimestamp_WithCM);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp <= b))
             {
                 next_from = iterIO->pid;
 
                 qdummyB.tstamp = b;
-                iterIStart = iterIO->iterI;
+                iterIBegin = iterIO->iterI;
 
                 iterIO2 = upper_bound(iterIO, iterIOEnd, qdummyB);//, CompareStartOffesetsByTimestamp_WithCM);
 //                iterIO2 = iterIO;
@@ -1595,7 +1595,7 @@ inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp a, Timest
 
             if ((from != cnt) && (from != -1) && (from < to))
             {
-                iterIStart = (this->pRepsIn_ioffsets[level][from]).iterI;
+                iterIBegin = (this->pRepsIn_ioffsets[level][from]).iterI;
                 iterIEnd   = (to != cnt) ? (this->pRepsIn_ioffsets[level][to]).iterI : this->pRepsInIds[level].end();
 
                 next_from = (this->pRepsIn_ioffsets[level][from]).pid;
@@ -1621,10 +1621,10 @@ inline bool HINT_M_ALL::getBounds_RepsIn(unsigned int level, Timestamp a, Timest
 }
 
 
-inline bool HINT_M_ALL::getBounds_RepsAft(unsigned int level, Timestamp t, PartitionId &next_from, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd)
+inline bool HINT_M_ALL::getBounds_RepsAft(unsigned int level, Timestamp t, PartitionId &next_from, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd)
 {
     OffsetEntry_ALL_RepsAft qdummy;
-    Offsets_ALL_RepsAft_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_ALL_RepsAft_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pRepsAft_ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -1635,12 +1635,12 @@ inline bool HINT_M_ALL::getBounds_RepsAft(unsigned int level, Timestamp t, Parti
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = this->pRepsAft_ioffsets[level].begin();
+            iterIOBegin = this->pRepsAft_ioffsets[level].begin();
             iterIOEnd = this->pRepsAft_ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareIdOffesetsByTimestamp);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareIdOffesetsByTimestamp);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
-                iterIStart = iterIO->iterI;
+                iterIBegin = iterIO->iterI;
                 iterIEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterI : this->pRepsAft[level].end());
 
                 next_from = iterIO->pid;
@@ -1668,7 +1668,7 @@ inline bool HINT_M_ALL::getBounds_RepsAft(unsigned int level, Timestamp t, Parti
 
             if ((from != cnt) && ((this->pRepsAft_ioffsets[level][from]).tstamp == t))
             {
-                iterIStart = (this->pRepsAft_ioffsets[level][from]).iterI;
+                iterIBegin = (this->pRepsAft_ioffsets[level][from]).iterI;
                 iterIEnd = ((from+1 != cnt) ? (this->pRepsAft_ioffsets[level][from+1]).iterI : this->pRepsAft[level].end());
 
                 next_from = (this->pRepsAft_ioffsets[level][from]).pid;
@@ -1695,14 +1695,14 @@ inline bool HINT_M_ALL::getBounds_RepsAft(unsigned int level, Timestamp t, Parti
 // Auxiliary functions to scan partitions.
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Equals(unsigned int level, Timestamp a, Timestamp qend, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qdummyS);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qdummyS.first == iter->first))
         {
             if (qend == iter->second)
@@ -1722,14 +1722,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Equals(unsigned int level, Tim
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Equals(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, boost::dynamic_bitset<> &vcand)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qstart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qstart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qstart == (*iter)))
         {
             vcand[(*iterI)] = 1;
@@ -1742,14 +1742,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Equals(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanLastPartition_RepsIn_Equals(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_RepsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_RepsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qend);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qend);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qend == (*iter)))
         {
             if (vcand[(*iterI)] == 1)
@@ -1769,14 +1769,14 @@ inline void HINT_M_ALL::scanLastPartition_RepsIn_Equals(unsigned int level, Time
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Starts(unsigned int level, Timestamp a, Timestamp qend, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qdummyS.first == iter->first))
         {
             if (qend < iter->second)
@@ -1796,14 +1796,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Starts(unsigned int level, Tim
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Starts(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qstart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qstart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qstart == (*iter)))
         {
 #ifdef WORKLOAD_COUNT
@@ -1821,14 +1821,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Starts(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Starts(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qstart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qstart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qstart == (*iter)))
         {
             if (vcand[(*iterI)] == 1)
@@ -1850,14 +1850,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Starts(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanLastPartition_RepsIn_Starts(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_RepsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_RepsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qend+1);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qend+1);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
             if (vcand[(*iterI)] == 1)
@@ -1879,12 +1879,12 @@ inline void HINT_M_ALL::scanLastPartition_RepsIn_Starts(unsigned int level, Time
 
 inline void HINT_M_ALL::scanLastPartition_RepsAft_Starts(unsigned int level, Timestamp a, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
 
 
-    if (this->getBounds_RepsAft(level, a, next_from, iterIStart, iterIEnd))
+    if (this->getBounds_RepsAft(level, a, next_from, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
             if (vcand[(*iterI)] == 1)
             {
@@ -1903,14 +1903,14 @@ inline void HINT_M_ALL::scanLastPartition_RepsAft_Starts(unsigned int level, Tim
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Started(unsigned int level, Timestamp a, Timestamp qend, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qdummyS.first == iter->first))
         {
             if (qend > iter->second)
@@ -1930,14 +1930,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Started(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Started(unsigned int level, Timestamp a, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qdummyS.first == iter->first))
         {
 #ifdef WORKLOAD_COUNT
@@ -1954,14 +1954,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Started(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanLastPartition_RepsIn_Started(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_RepsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_RepsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<Timestamp>::iterator pivot = lower_bound(iterStart, iterEnd, qend);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<Timestamp>::iterator pivot = lower_bound(iterBegin, iterEnd, qend);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (vcand[(*iterI)] == 1)
             {
@@ -1981,12 +1981,12 @@ inline void HINT_M_ALL::scanLastPartition_RepsIn_Started(unsigned int level, Tim
 
 inline void HINT_M_ALL::scanPartitions_RepsIn_Started(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
 
 
-    if (this->getBounds_RepsIn(level, a, b, next_from, next_to, iterIStart, iterIEnd))
+    if (this->getBounds_RepsIn(level, a, b, next_from, next_to, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
             if (vcand[(*iterI)] == 1)
             {
@@ -2005,14 +2005,14 @@ inline void HINT_M_ALL::scanPartitions_RepsIn_Started(unsigned int level, Timest
 
 inline void HINT_M_ALL::scanLastPartition_OrgsIn_Finishes(unsigned int level, Timestamp b, Timestamp qend, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (qend == iter->second)
             {
@@ -2030,13 +2030,13 @@ inline void HINT_M_ALL::scanLastPartition_OrgsIn_Finishes(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Finishes(unsigned int level, Timestamp a, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (vcand[(*iterI)] == 1)
             {
@@ -2056,14 +2056,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Finishes(unsigned int level, 
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Finishes(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<Timestamp>::iterator pivot = lower_bound(iterStart, iterEnd, qstart);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<Timestamp>::iterator pivot = lower_bound(iterBegin, iterEnd, qstart);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (vcand[(*iterI)] == 1)
             {
@@ -2083,14 +2083,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Finishes(unsigned int level, 
 
 inline void HINT_M_ALL::scanLastPartition_RepsIn_Finishes(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_RepsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_RepsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qend);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qend);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qend == (*iter)))
         {
 #ifdef WORKLOAD_COUNT
@@ -2108,14 +2108,14 @@ inline void HINT_M_ALL::scanLastPartition_RepsIn_Finishes(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanLastPartition_RepsIn_Finishes(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_RepsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_RepsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qend);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qend);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qend == (*iter)))
         {
             if (vcand[(*iterI)] == 1)
@@ -2137,14 +2137,14 @@ inline void HINT_M_ALL::scanLastPartition_RepsIn_Finishes(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanLastPartition_OrgsIn_Finished(unsigned int level, Timestamp b, Timestamp qend, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
             if (qend == iter->second)
@@ -2164,13 +2164,13 @@ inline void HINT_M_ALL::scanLastPartition_OrgsIn_Finished(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanLastPartition_OrgsIn_Finished(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qend == iter->second)
             {
@@ -2188,14 +2188,14 @@ inline void HINT_M_ALL::scanLastPartition_OrgsIn_Finished(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Finished(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qstart+1);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qstart+1);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
             if (vcand[(*iterI)] == 1)
@@ -2217,14 +2217,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Finished(unsigned int level, 
 
 inline void HINT_M_ALL::scanPartitions_OrgsAft_Finished(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     PartitionId from = next_from, to = next_to;
 
 
-    if (this->getBounds_OrgsAft(level, a, b, next_from, next_to, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, b, next_from, next_to, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (vcand[(*iterI)] == 1)
             {
@@ -2244,14 +2244,14 @@ inline void HINT_M_ALL::scanPartitions_OrgsAft_Finished(unsigned int level, Time
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Meets(unsigned int level, Timestamp a, Timestamp qstart, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qdummyS);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qstart == iter->first))
         {
 #ifdef WORKLOAD_COUNT
@@ -2269,14 +2269,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Meets(unsigned int level, Time
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Meets(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qstart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qstart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qstart == (*iter)))
         {
 #ifdef WORKLOAD_COUNT
@@ -2294,13 +2294,13 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Meets(unsigned int level, Tim
 
 inline void HINT_M_ALL::scanLastPartition_OrgsIn_Met(unsigned int level, Timestamp a, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qend == iter->second)
             {
@@ -2318,14 +2318,14 @@ inline void HINT_M_ALL::scanLastPartition_OrgsIn_Met(unsigned int level, Timesta
 
 inline void HINT_M_ALL::scanLastPartition_RepsIn_Met(unsigned int level, Timestamp a, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_RepsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_RepsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qend);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qend);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qend == (*iter)))
         {
 #ifdef WORKLOAD_COUNT
@@ -2343,14 +2343,14 @@ inline void HINT_M_ALL::scanLastPartition_RepsIn_Met(unsigned int level, Timesta
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Overlaps(unsigned int level, Timestamp a, Timestamp qend, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qend > iter->first))
         {
             if (qend < iter->second)
@@ -2370,14 +2370,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Overlaps(unsigned int level, T
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Overlaps(unsigned int level, Timestamp a, Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qstart+1);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qstart+1);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qend > (*iter)))
         {
 #ifdef WORKLOAD_COUNT
@@ -2395,14 +2395,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Overlaps(unsigned int level, 
 
 inline void HINT_M_ALL::scanLastPartition_OrgsIn_Overlaps(unsigned int level, Timestamp b, pair<Timestamp, Timestamp> qdummyE, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, qdummyE, CompareTimestampPairsByStart);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, qdummyE, CompareTimestampPairsByStart);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (qdummyE.first < iter->second)
             {
@@ -2420,14 +2420,14 @@ inline void HINT_M_ALL::scanLastPartition_OrgsIn_Overlaps(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanLastPartition_OrgsAft_Overlaps(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<Timestamp>::iterator pivot = lower_bound(iterStart, iterEnd, qend);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<Timestamp>::iterator pivot = lower_bound(iterBegin, iterEnd, qend);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -2443,14 +2443,14 @@ inline void HINT_M_ALL::scanLastPartition_OrgsAft_Overlaps(unsigned int level, T
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Overlapped(unsigned int level, Timestamp a, Timestamp qend, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
              if ((qdummyS.first < iter->second) && (qend > iter->second))
              {
@@ -2468,14 +2468,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Overlapped(unsigned int level,
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Overlapped(unsigned int level, Timestamp a, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
              if (qdummyS.first < iter->second)
              {
@@ -2493,13 +2493,13 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Overlapped(unsigned int level,
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Overlapped(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
              if (qstart < iter->second)
              {
@@ -2517,14 +2517,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Overlapped(unsigned int level,
 
 inline void HINT_M_ALL::scanFirstPartition_RepsIn_Overlapped(unsigned int level, Timestamp a, Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_RepsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_RepsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qstart+1);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qstart+1);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && ((*iter) < qend))
         {
 #ifdef WORKLOAD_COUNT
@@ -2542,14 +2542,14 @@ inline void HINT_M_ALL::scanFirstPartition_RepsIn_Overlapped(unsigned int level,
 
 inline void HINT_M_ALL::scanFirstPartition_RepsIn_Overlapped(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_RepsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_RepsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qstart+1);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qstart+1);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -2567,14 +2567,14 @@ inline void HINT_M_ALL::scanFirstPartition_RepsIn_Overlapped(unsigned int level,
 
 inline void HINT_M_ALL::scanLastPartition_RepsIn_Overlapped(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_RepsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_RepsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<Timestamp>::iterator pivot = lower_bound(iterStart, iterEnd, qend);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<Timestamp>::iterator pivot = lower_bound(iterBegin, iterEnd, qend);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (vcand[(*iterI)] == 1)
             {
@@ -2594,14 +2594,14 @@ inline void HINT_M_ALL::scanLastPartition_RepsIn_Overlapped(unsigned int level, 
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Contains(unsigned int level, Timestamp a, Timestamp qend, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
             if (qend > iter->second)
@@ -2621,14 +2621,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Contains(unsigned int level, T
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Contains(unsigned int level, Timestamp a, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -2646,13 +2646,13 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Contains(unsigned int level, T
 
 inline void HINT_M_ALL::scanLastPartition_OrgsIn_Contains(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qend > iter->second)
             {
@@ -2670,14 +2670,14 @@ inline void HINT_M_ALL::scanLastPartition_OrgsIn_Contains(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Contains(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qstart+1);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qstart+1);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
             if (vcand[(*iterI)] == 1)
@@ -2699,15 +2699,15 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Contains(unsigned int level, 
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Contained(unsigned int level, Timestamp a, Timestamp qend, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-//        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, qdummyS);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+//        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, qdummyS);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 //            if (iter->first > qdummyS.first)
 //                break;
@@ -2728,14 +2728,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Contained(unsigned int level, 
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Contained(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<Timestamp>::iterator pivot = lower_bound(iterStart, iterEnd, qstart);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<Timestamp>::iterator pivot = lower_bound(iterBegin, iterEnd, qstart);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -2751,14 +2751,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Contained(unsigned int level,
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Contained(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<Timestamp>::iterator pivot = lower_bound(iterStart, iterEnd, qstart);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<Timestamp>::iterator pivot = lower_bound(iterBegin, iterEnd, qstart);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (vcand[(*iterI)] == 1)
             {
@@ -2778,12 +2778,12 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_Contained(unsigned int level,
 
 inline void HINT_M_ALL::scanFirstPartition_RepsAft_Contained(unsigned int level, Timestamp a, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
 
 
-    if (this->getBounds_RepsAft(level, a, next_from, iterIStart, iterIEnd))
+    if (this->getBounds_RepsAft(level, a, next_from, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
             if (vcand[(*iterI)] == 1)
             {
@@ -2802,14 +2802,14 @@ inline void HINT_M_ALL::scanFirstPartition_RepsAft_Contained(unsigned int level,
 
 inline void HINT_M_ALL::scanLastPartition_OrgsIn_Precedes(unsigned int level, Timestamp b, pair<Timestamp, Timestamp> qdummyE, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qdummyE);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyE);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -2827,14 +2827,14 @@ inline void HINT_M_ALL::scanLastPartition_OrgsIn_Precedes(unsigned int level, Ti
 
 inline void HINT_M_ALL::scanLastPartition_OrgsAft_Precedes(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qend);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qend);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -2852,14 +2852,14 @@ inline void HINT_M_ALL::scanLastPartition_OrgsAft_Precedes(unsigned int level, T
 
 inline void HINT_M_ALL::scanPartitions_OrgsIn_Precedes(unsigned int level, Timestamp b, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBoundsS_OrgsIn(level, b, next_from, iterStart, iterI))
+    if (this->getBoundsS_OrgsIn(level, b, next_from, iterBegin, iterI))
     {
         iterEnd = this->pOrgsInTimestamps[level].end();
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -2875,14 +2875,14 @@ inline void HINT_M_ALL::scanPartitions_OrgsIn_Precedes(unsigned int level, Times
 
 inline void HINT_M_ALL::scanPartitions_OrgsAft_Precedes(unsigned int level, Timestamp b, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBoundsS_OrgsAft(level, b, next_from, iterStart, iterI))
+    if (this->getBoundsS_OrgsAft(level, b, next_from, iterBegin, iterI))
     {
         iterEnd = this->pOrgsAftTimestamp[level].end();
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -2898,13 +2898,13 @@ inline void HINT_M_ALL::scanPartitions_OrgsAft_Precedes(unsigned int level, Time
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Preceded(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qstart > iter->second)
             {
@@ -2922,18 +2922,18 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_Preceded(unsigned int level, T
 
 inline void HINT_M_ALL::scanFirstPartition_RepsIn_Preceded(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     tuple<Timestamp, RelationIdIterator, vector<Timestamp>::iterator, PartitionId> qdummy;
-    vector<tuple<Timestamp, RelationIdIterator, vector<Timestamp>::iterator, PartitionId> >::iterator iterIO, iterIOStart, iterIOEnd;
+    vector<tuple<Timestamp, RelationIdIterator, vector<Timestamp>::iterator, PartitionId> >::iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pRepsIn_ioffsets[level].size();
     PartitionId from = next_from;
 
 
-    if (this->getBounds_RepsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_RepsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<Timestamp>::iterator pivot = lower_bound(iterStart, iterEnd, qstart);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<Timestamp>::iterator pivot = lower_bound(iterBegin, iterEnd, qstart);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -2949,18 +2949,18 @@ inline void HINT_M_ALL::scanFirstPartition_RepsIn_Preceded(unsigned int level, T
 
 inline void HINT_M_ALL::scanPartitions_OrgsIn_Preceded(unsigned int level, Timestamp a, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     tuple<Timestamp, RelationIdIterator, vector<pair<Timestamp, Timestamp> >::iterator, PartitionId> qdummy;
-    vector<tuple<Timestamp, RelationIdIterator, vector<pair<Timestamp, Timestamp> >::iterator, PartitionId> >::iterator iterIO, iterIOStart, iterIOEnd;
+    vector<tuple<Timestamp, RelationIdIterator, vector<pair<Timestamp, Timestamp> >::iterator, PartitionId> >::iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pOrgsIn_ioffsets[level].size();
     PartitionId from = next_from;
 
 
     if (this->getBoundsE_OrgsIn(level, a, next_from, iterEnd, iterI))
     {
-        iterStart = this->pOrgsInTimestamps[level].begin();
-        for (iter = iterStart; iter != iterEnd; iter++)
+        iterBegin = this->pOrgsInTimestamps[level].begin();
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -2976,18 +2976,18 @@ inline void HINT_M_ALL::scanPartitions_OrgsIn_Preceded(unsigned int level, Times
 
 inline void HINT_M_ALL::scanPartitions_RepsIn_Preceded(unsigned int level, Timestamp a, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     tuple<Timestamp, RelationIdIterator, vector<Timestamp>::iterator, PartitionId> qdummy;
-    vector<tuple<Timestamp, RelationIdIterator, vector<Timestamp>::iterator, PartitionId> >::iterator iterIO, iterIOStart, iterIOEnd;
+    vector<tuple<Timestamp, RelationIdIterator, vector<Timestamp>::iterator, PartitionId> >::iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = this->pRepsIn_ioffsets[level].size();
     PartitionId from = next_from;
 
 
     if (this->getBoundsE_RepsIn(level, a, next_from, iterEnd, iterI))
     {
-        iterStart = this->pRepsInTimestamp[level].begin();
-        for (iter = iterStart; iter != iterEnd; iter++)
+        iterBegin = this->pRepsInTimestamp[level].begin();
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3003,13 +3003,13 @@ inline void HINT_M_ALL::scanPartitions_RepsIn_Preceded(unsigned int level, Times
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_gOverlaps(unsigned int level, Timestamp a, PartitionId &next_from, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     tuple<Timestamp, RelationIdIterator, vector<pair<Timestamp, Timestamp> >::iterator, PartitionId> qdummy;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterIStart, iterIEnd))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3023,14 +3023,14 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_gOverlaps(unsigned int level, 
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_gOverlaps(unsigned int level, Timestamp a, Timestamp qstart, pair<Timestamp, Timestamp> qdummyE, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, qdummyE);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, qdummyE);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (qstart <= iter->second)
             {
@@ -3048,13 +3048,13 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_gOverlaps(unsigned int level, 
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsIn_gOverlaps(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qstart <= iter->second)
             {
@@ -3072,13 +3072,13 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsIn_gOverlaps(unsigned int level, 
 
 inline void HINT_M_ALL::scanFirstPartition_OrgsAft_gOverlaps(unsigned int level, Timestamp a, PartitionId &next_from, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     tuple<Timestamp, RelationIdIterator, vector<Timestamp>::iterator, PartitionId> qdummy;
 
 
-    if (this->getBounds_OrgsAft(level, a, next_from, iterIStart, iterIEnd))
+    if (this->getBounds_OrgsAft(level, a, next_from, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3092,13 +3092,13 @@ inline void HINT_M_ALL::scanFirstPartition_OrgsAft_gOverlaps(unsigned int level,
 
 inline void HINT_M_ALL::scanFirstPartition_RepsIn_gOverlaps(unsigned int level, Timestamp a, PartitionId &next_from, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     tuple<Timestamp, RelationIdIterator, vector<Timestamp>::iterator, PartitionId> qdummy;
 
 
-    if (this->getBounds_RepsIn(level, a, next_from, iterIStart, iterIEnd))
+    if (this->getBounds_RepsIn(level, a, next_from, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3112,14 +3112,14 @@ inline void HINT_M_ALL::scanFirstPartition_RepsIn_gOverlaps(unsigned int level, 
 
 inline void HINT_M_ALL::scanFirstPartition_RepsIn_gOverlaps(unsigned int level, Timestamp a, RecordEnd qdummyS, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_RepsIn(level, a, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_RepsIn(level, a, next_from, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, qdummyS.end);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS.end);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -3137,12 +3137,12 @@ inline void HINT_M_ALL::scanFirstPartition_RepsIn_gOverlaps(unsigned int level, 
 
 inline void HINT_M_ALL::scanFirstPartition_RepsAft_gOverlaps(unsigned int level, Timestamp a, PartitionId &next_from, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
 
 
-    if (this->getBounds_RepsAft(level, a, next_from, iterIStart, iterIEnd))
+    if (this->getBounds_RepsAft(level, a, next_from, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3156,14 +3156,14 @@ inline void HINT_M_ALL::scanFirstPartition_RepsAft_gOverlaps(unsigned int level,
 
 inline void HINT_M_ALL::scanLastPartition_OrgsIn_gOverlaps(unsigned int level, Timestamp b, pair<Timestamp, Timestamp> qdummyE, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsIn(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsIn(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, qdummyE);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, qdummyE);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3179,14 +3179,14 @@ inline void HINT_M_ALL::scanLastPartition_OrgsIn_gOverlaps(unsigned int level, T
 
 inline void HINT_M_ALL::scanLastPartition_OrgsAft_gOverlaps(unsigned int level, Timestamp b, RecordStart qdummySE, PartitionId &next_from, size_t &result)
 {
-    vector<Timestamp>::iterator iter, iterStart, iterEnd;
+    vector<Timestamp>::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds_OrgsAft(level, b, next_from, iterStart, iterEnd, iterI))
+    if (this->getBounds_OrgsAft(level, b, next_from, iterBegin, iterEnd, iterI))
     {
-        vector<Timestamp>::iterator pivot = lower_bound(iterStart, iterEnd, qdummySE.start);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<Timestamp>::iterator pivot = lower_bound(iterBegin, iterEnd, qdummySE.start);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3202,12 +3202,12 @@ inline void HINT_M_ALL::scanLastPartition_OrgsAft_gOverlaps(unsigned int level, 
 
 inline void HINT_M_ALL::scanPartitions_OrgsIn_gOverlaps(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
 
 
-    if (this->getBounds_OrgsIn(level, a, b, next_from, next_to, iterIStart, iterIEnd))
+    if (this->getBounds_OrgsIn(level, a, b, next_from, next_to, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3221,12 +3221,12 @@ inline void HINT_M_ALL::scanPartitions_OrgsIn_gOverlaps(unsigned int level, Time
 
 inline void HINT_M_ALL::scanPartitions_OrgsAft_gOverlaps(unsigned int level, Timestamp a, Timestamp b, PartitionId &next_from, PartitionId &next_to, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
 
 
-    if (this->getBounds_OrgsAft(level, a, b, next_from, next_to, iterIStart, iterIEnd))
+    if (this->getBounds_OrgsAft(level, a, b, next_from, next_to, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3236,259 +3236,13 @@ inline void HINT_M_ALL::scanPartitions_OrgsAft_gOverlaps(unsigned int level, Tim
         }
     }
 }
-//
-//
-//
-//
-//inline void HINT_M_ALL::scanFirstPartition_OrgsIn_gContains(unsigned int level, Timestamp a, Timestamp qend, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
-//{
-//    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-//    RelationIdIterator iterI;
-//
-//
-//    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
-//    {
-//        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-//        iterI += iter-iterStart;
-//        while (iter != iterEnd)
-//        {
-//            if (qend >= iter->second)
-//            {
-//#ifdef WORKLOAD_COUNT
-//                result++;
-//#else
-//                result ^= (*iterI);
-//#endif
-//            }
-//            iter++;
-//            iterI++;
-//        }
-//    }
-//}
-//
-//
-//inline void HINT_M_ALL::scanFirstPartition_OrgsIn_gContains(unsigned int level, Timestamp a, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
-//{
-//    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-//    RelationIdIterator iterI;
-//
-//
-//    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
-//    {
-//        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-//        iterI += iter-iterStart;
-//        while (iter != iterEnd)
-//        {
-//#ifdef WORKLOAD_COUNT
-//            result++;
-//#else
-//            result ^= (*iterI);
-//#endif
-//
-//            iterI++;
-//            iter++;
-//        }
-//    }
-//}
-//
-//
-//inline void HINT_M_ALL::scanFirstPartition_OrgsAft_gContains(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
-//{
-//    vector<Timestamp>::iterator iter, iterStart, iterEnd;
-//    RelationIdIterator iterI;
-//
-//
-//    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
-//    {
-//        iter = lower_bound(iterStart, iterEnd, qstart);
-//        iterI += iter-iterStart;
-//        while (iter != iterEnd)
-//        {
-//            if (vcand[(*iterI)] == 1)
-//            {
-//#ifdef WORKLOAD_COUNT
-//                result++;
-//#else
-//                result ^= (*iterI);
-//#endif
-//            }
-//            else
-//                vcand[(*iterI)] = 1;
-//            iterI++;
-//            iter++;
-//        }
-//    }
-//}
-//
-//
-//inline void HINT_M_ALL::scanLastPartition_OrgsIn_gContains(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, size_t &result)
-//{
-//    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-//    RelationIdIterator iterI;
-//
-//
-//    if (this->getBounds_OrgsIn(level, b, next_from, iterStart, iterEnd, iterI))
-//    {
-//        for (iter = iterStart; iter != iterEnd; iter++)
-//        {
-//            if (qend >= iter->second)
-//            {
-//#ifdef WORKLOAD_COUNT
-//                result++;
-//#else
-//                result ^= (*iterI);
-//#endif
-//            }
-//            iterI++;
-//        }
-//    }
-//}
-//
-//
-//inline void HINT_M_ALL::scanLastPartition_RepsIn_gContains(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
-//{
-//    vector<Timestamp>::iterator iter, iterStart, iterEnd;
-//    RelationIdIterator iterI;
-//
-//
-//    if (this->getBounds_RepsIn(level, b, next_from, iterStart, iterEnd, iterI))
-//    {
-//        vector<Timestamp>::iterator pivot = upper_bound(iterStart, iterEnd, qend);
-//        for (iter = iterStart; iter != pivot; iter++)
-//        {
-//            if (vcand[(*iterI)] == 1)
-//            {
-//#ifdef WORKLOAD_COUNT
-//                result++;
-//#else
-//                result ^= (*iterI);
-//#endif
-//            }
-//            else
-//                vcand[(*iterI)] = 1;
-//            iterI++;
-//        }
-//    }
-//}
-//
-//
-//
-//
-//inline void HINT_M_ALL::scanFirstPartition_OrgsIn_gContained(unsigned int level, Timestamp a, Timestamp qend, pair<Timestamp, Timestamp> qdummyS, PartitionId &next_from, size_t &result)
-//{
-//    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-//    RelationIdIterator iterI;
-//
-//
-//    if (this->getBounds_OrgsIn(level, a, next_from, iterStart, iterEnd, iterI))
-//    {
-//        vector<pair<Timestamp, Timestamp> >::iterator pivot = upper_bound(iterStart, iterEnd, qdummyS);
-////        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, qdummyS);
-//        for (iter = iterStart; iter != pivot; iter++)
-//        {
-////            if (iter->first > qdummyS.first)
-////                break;
-//
-//            if (qend <= iter->second)
-//            {
-//#ifdef WORKLOAD_COUNT
-//                result++;
-//#else
-//                result ^= (*iterI);
-//#endif
-//            }
-//            iterI++;
-//        }
-//    }
-//}
-//
-//
-//inline void HINT_M_ALL::scanFirstPartition_OrgsAft_gContained(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, size_t &result)
-//{
-//    vector<Timestamp>::iterator iter, iterStart, iterEnd;
-//    RelationIdIterator iterI;
-//
-//
-//    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
-//    {
-//        vector<Timestamp>::iterator pivot = upper_bound(iterStart, iterEnd, qstart);
-//        for (iter = iterStart; iter != pivot; iter++)
-//        {
-//#ifdef WORKLOAD_COUNT
-//            result++;
-//#else
-//            result ^= (*iterI);
-//#endif
-//
-//            iterI++;
-//        }
-//    }
-//}
-//
-//
-//inline void HINT_M_ALL::scanFirstPartition_OrgsAft_gContained(unsigned int level, Timestamp a, Timestamp qstart, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
-//{
-//    vector<Timestamp>::iterator iter, iterStart, iterEnd;
-//    RelationIdIterator iterI;
-//
-//
-//    if (this->getBounds_OrgsAft(level, a, next_from, iterStart, iterEnd, iterI))
-//    {
-//        vector<Timestamp>::iterator pivot = upper_bound(iterStart, iterEnd, qstart);
-//        for (iter = iterStart; iter != pivot; iter++)
-//        {
-//            if (vcand[(*iterI)] == 1)
-//            {
-//#ifdef WORKLOAD_COUNT
-//                result++;
-//#else
-//                result ^= (*iterI);
-//#endif
-//            }
-//            else
-//                vcand[(*iterI)] = 1;
-//            iterI++;
-//        }
-//    }
-//}
-//
-//
-
-//inline void HINT_M_ALL::scanLastPartition_RepsIn_gContained(unsigned int level, Timestamp b, Timestamp qend, PartitionId &next_from, boost::dynamic_bitset<> &vcand, size_t &result)
-//{
-//    vector<Timestamp>::iterator iter, iterStart, iterEnd;
-//    RelationIdIterator iterI;
-//
-//    if (this->getBounds_RepsIn(level, b, next_from, iterStart, iterEnd, iterI))
-//    {
-//        iter = lower_bound(iterStart, iterEnd, qend);
-//        iterI += iter-iterStart;
-//        while (iter != iterEnd)
-//        {
-//            if (vcand[(*iterI)] == 1)
-//            {
-//#ifdef WORKLOAD_COUNT
-//                result++;
-//#else
-//                result ^= (*iterI);
-//#endif
-//            }
-//            else
-//                vcand[(*iterI)] = 1;
-//            iter++;
-//            iterI++;
-//        }
-//    }
-//}
-//
-//
 
 
 // Basic predicates of Allen's algebra
 size_t HINT_M_ALL::executeBottomUp_Equals(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -3573,7 +3327,7 @@ size_t HINT_M_ALL::executeBottomUp_Equals(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Starts(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -3616,10 +3370,10 @@ size_t HINT_M_ALL::executeBottomUp_Starts(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (Q.start == iter->first))
         {
             if (Q.end < iter->second)
@@ -3643,7 +3397,7 @@ size_t HINT_M_ALL::executeBottomUp_Starts(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Started(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -3690,10 +3444,10 @@ size_t HINT_M_ALL::executeBottomUp_Started(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (Q.start == iter->first))
         {
             if (Q.end > iter->second)
@@ -3717,7 +3471,7 @@ size_t HINT_M_ALL::executeBottomUp_Started(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Finishes(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -3766,10 +3520,10 @@ size_t HINT_M_ALL::executeBottomUp_Finishes(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (Q.end == iter->second)
             {
@@ -3791,7 +3545,7 @@ size_t HINT_M_ALL::executeBottomUp_Finishes(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Finished(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -3838,10 +3592,10 @@ size_t HINT_M_ALL::executeBottomUp_Finished(RangeQuery Q)
     if (!foundzero)
     {
         // Comparisons needed
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        iterI = this->pOrgsInIds[this->numBits].begin() + (iter-iterStart);
+        iter = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        iterI = this->pOrgsInIds[this->numBits].begin() + (iter-iterBegin);
         while (iter != iterEnd)
         {
             if (Q.end == iter->second)
@@ -3865,7 +3619,7 @@ size_t HINT_M_ALL::executeBottomUp_Finished(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Meets(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
     pair<Timestamp, Timestamp> qdummyE(Q.end, Q.end);
@@ -3899,7 +3653,7 @@ size_t HINT_M_ALL::executeBottomUp_Meets(RangeQuery Q)
         iterI = this->pOrgsInIds[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
         iter = lower_bound(this->pOrgsInTimestamps[this->numBits].begin(), iterEnd, qdummyE, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (Q.end == iter->first))
         {
 #ifdef WORKLOAD_COUNT
@@ -3921,7 +3675,7 @@ size_t HINT_M_ALL::executeBottomUp_Meets(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Met(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     pair<Timestamp, Timestamp> qdummyE(Q.start, Q.start);
@@ -3952,10 +3706,10 @@ size_t HINT_M_ALL::executeBottomUp_Met(RangeQuery Q)
     if (foundzero)
     {
         // Comparisons needed
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
         iterI = this->pOrgsInIds[this->numBits].begin();
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (Q.start == iter->second)
             {
@@ -3977,8 +3731,8 @@ size_t HINT_M_ALL::executeBottomUp_Met(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Overlaps(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end   >> (this->maxBits-this->numBits); // prefix
     pair<Timestamp, Timestamp> qdummyS(Q.start+1, Q.start+1);
@@ -4045,18 +3799,18 @@ size_t HINT_M_ALL::executeBottomUp_Overlaps(RangeQuery Q)
 //    if (foundone && foundzero)
 //    {
 //        // All contents are guaranteed to be results
-//        iterIStart = this->pOrgsInIds[this->numBits].begin();
+//        iterIBegin = this->pOrgsInIds[this->numBits].begin();
 //        iterIEnd = this->pOrgsInIds[this->numBits].end();
-//        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+//        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
 //            result ^= (*iterI);
 //    }
 //    else
 //    {
 //        // Comparisons needed
 //        iterI = this->pOrgsInIds[this->numBits].begin();
-//        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
-//        iterEnd = lower_bound(iterStart, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampsByStart);
-//        for (iter = iterStart; iter != iterEnd; iter++)
+//        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
+//        iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampsByStart);
+//        for (iter = iterBegin; iter != iterEnd; iter++)
 //        {
 //            if (Q.start <= iter->second)
 //                result ^= (*iterI);
@@ -4072,8 +3826,8 @@ size_t HINT_M_ALL::executeBottomUp_Overlaps(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Overlapped(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end   >> (this->maxBits-this->numBits); // prefix
     pair<Timestamp, Timestamp> qdummyS(Q.start, Q.start);
@@ -4139,18 +3893,18 @@ size_t HINT_M_ALL::executeBottomUp_Overlapped(RangeQuery Q)
 //    if (foundone && foundzero)
 //    {
 //        // All contents are guaranteed to be results
-//        iterIStart = this->pOrgsInIds[this->numBits].begin();
+//        iterIBegin = this->pOrgsInIds[this->numBits].begin();
 //        iterIEnd = this->pOrgsInIds[this->numBits].end();
-//        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+//        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
 //            result ^= (*iterI);
 //    }
 //    else
 //    {
 //        // Comparisons needed
 //        iterI = this->pOrgsInIds[this->numBits].begin();
-//        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
-//        iterEnd = lower_bound(iterStart, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampsByStart);
-//        for (iter = iterStart; iter != iterEnd; iter++)
+//        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
+//        iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampsByStart);
+//        for (iter = iterBegin; iter != iterEnd; iter++)
 //        {
 //            if (Q.start <= iter->second)
 //                result ^= (*iterI);
@@ -4166,7 +3920,7 @@ size_t HINT_M_ALL::executeBottomUp_Overlapped(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Contains(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -4229,10 +3983,10 @@ size_t HINT_M_ALL::executeBottomUp_Contains(RangeQuery Q)
     if (!(foundone && foundzero))
     {
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterStart, iterEnd, qdummyS, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyS, CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
             if (Q.end > iter->second)
@@ -4256,7 +4010,7 @@ size_t HINT_M_ALL::executeBottomUp_Contains(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Contained(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -4296,9 +4050,9 @@ size_t HINT_M_ALL::executeBottomUp_Contained(RangeQuery Q)
 
     // Handle root.
     iterI = this->pOrgsInIds[this->numBits].begin();
-    iterStart = this->pOrgsInTimestamps[this->numBits].begin();
-    vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, this->pOrgsInTimestamps[this->numBits].end(), qdummyS, CompareTimestampPairsByStart);
-    for (iter = iterStart; iter != pivot; iter++)
+    iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
+    vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits].end(), qdummyS, CompareTimestampPairsByStart);
+    for (iter = iterBegin; iter != pivot; iter++)
     {
         if (Q.end < iter->second)
         {
@@ -4319,8 +4073,8 @@ size_t HINT_M_ALL::executeBottomUp_Contained(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Precedes(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
     pair<Timestamp, Timestamp> qdummyE(Q.end+1, Q.end+1);
     bool foundzero = false;
@@ -4356,10 +4110,10 @@ size_t HINT_M_ALL::executeBottomUp_Precedes(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterStart, iterEnd, qdummyE, CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, qdummyE, CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -4374,9 +4128,9 @@ size_t HINT_M_ALL::executeBottomUp_Precedes(RangeQuery Q)
     }
     else
     {
-        iterIStart = this->pOrgsInIds[this->numBits].begin();
+        iterIBegin = this->pOrgsInIds[this->numBits].begin();
         iterIEnd = this->pOrgsInIds[this->numBits].end();
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -4394,8 +4148,8 @@ size_t HINT_M_ALL::executeBottomUp_Precedes(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_Preceded(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     pair<Timestamp, Timestamp> qdummyS(Q.start, Q.start);
     bool foundzero = false;
@@ -4434,9 +4188,9 @@ size_t HINT_M_ALL::executeBottomUp_Preceded(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (Q.start > iter->second)
             {
@@ -4451,9 +4205,9 @@ size_t HINT_M_ALL::executeBottomUp_Preceded(RangeQuery Q)
     }
     else
     {
-        iterIStart = this->pOrgsInIds[this->numBits].begin();
+        iterIBegin = this->pOrgsInIds[this->numBits].begin();
         iterIEnd = this->pOrgsInIds[this->numBits].end();
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -4472,10 +4226,8 @@ size_t HINT_M_ALL::executeBottomUp_Preceded(RangeQuery Q)
 size_t HINT_M_ALL::executeBottomUp_gOverlaps(StabbingQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    vector<Timestamp>::iterator iterSStart, iterSEnd;
-    vector<Timestamp>::iterator iterEStart, iterEEnd;
-    RelationIdIterator iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp a = Q.point >> (this->maxBits-this->numBits); // prefix
     RecordStart qdummySE(0, Q.point+1);
     RecordEnd qdummyS(0, Q.point);
@@ -4522,30 +4274,30 @@ size_t HINT_M_ALL::executeBottomUp_gOverlaps(StabbingQuery Q)
     if (foundone && foundzero)
     {
         // All contents are guaranteed to be results
-        iterIStart = this->pOrgsInIds[this->numBits].begin();
+        iterIBegin = this->pOrgsInIds[this->numBits].begin();
         iterIEnd = this->pOrgsInIds[this->numBits].end();
-        for (RelationIdIterator iter = iterIStart; iter != iterIEnd; iter++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
 #else
-            result ^= (*iter);
+            result ^= (*iterI);
 #endif
         }
     }
     else
     {
         // Comparisons needed
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
-        iterEnd = lower_bound(iterStart, this->pOrgsInTimestamps[this->numBits].end(), qdummyE, CompareTimestampPairsByStart);
-        for (iter = iterStart; iter != iterEnd; iter++)
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
+        iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits].end(), qdummyE, CompareTimestampPairsByStart);
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (Q.point <= iter->second)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
 #else
-                result ^= this->pOrgsInIds[this->numBits][iter-iterStart];
+                result ^= this->pOrgsInIds[this->numBits][iter-iterBegin];
 #endif
             }
         }
@@ -4559,8 +4311,8 @@ size_t HINT_M_ALL::executeBottomUp_gOverlaps(StabbingQuery Q)
 size_t HINT_M_ALL::executeBottomUp_gOverlaps(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end   >> (this->maxBits-this->numBits); // prefix
     RecordStart qdummySE(0, Q.end+1);
@@ -4631,9 +4383,9 @@ size_t HINT_M_ALL::executeBottomUp_gOverlaps(RangeQuery Q)
     if (foundone && foundzero)
     {
         // All contents are guaranteed to be results
-        iterIStart = this->pOrgsInIds[this->numBits].begin();
+        iterIBegin = this->pOrgsInIds[this->numBits].begin();
         iterIEnd = this->pOrgsInIds[this->numBits].end();
-        for (RelationIdIterator iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -4646,9 +4398,9 @@ size_t HINT_M_ALL::executeBottomUp_gOverlaps(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
-        iterEnd = lower_bound(iterStart, this->pOrgsInTimestamps[this->numBits].end(), qdummyE, CompareTimestampPairsByStart);
-        for (iter = iterStart; iter != iterEnd; iter++)
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
+        iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits].end(), qdummyE, CompareTimestampPairsByStart);
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (Q.start <= iter->second)
             {

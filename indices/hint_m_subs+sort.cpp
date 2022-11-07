@@ -312,7 +312,7 @@ void HINT_M_SubsSort::getStats()
 size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
 {
     size_t result = 0;
-    Relation::iterator iterStart;
+    Relation::iterator iterBegin;
     RelationIterator iter, iterEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end   >> (this->maxBits-this->numBits); // prefix
@@ -330,9 +330,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
             // all contents are guaranteed to be results
             
             // Handle the partition that contains a: consider both originals and replicas
-            iterStart = this->pRepsIn[l][a].begin();
+            iterBegin = this->pRepsIn[l][a].begin();
             iterEnd = this->pRepsIn[l][a].end();
-            for (iter = iterStart; iter != iterEnd; iter++)
+            for (iter = iterBegin; iter != iterEnd; iter++)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
@@ -340,9 +340,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                 result ^= iter->id;
 #endif
             }
-            iterStart =this->pRepsAft[l][a].begin();
+            iterBegin =this->pRepsAft[l][a].begin();
             iterEnd = this->pRepsAft[l][a].end();
-            for (iter = iterStart; iter != iterEnd; iter++)
+            for (iter = iterBegin; iter != iterEnd; iter++)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
@@ -354,9 +354,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
             // Handle rest: consider only originals
             for (auto j = a; j <= b; j++)
             {
-                iterStart = this->pOrgsIn[l][j].begin();
+                iterBegin = this->pOrgsIn[l][j].begin();
                 iterEnd = this->pOrgsIn[l][j].end();
-                for (iter = iterStart; iter != iterEnd; iter++)
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
@@ -364,9 +364,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                     result ^= iter->id;
 #endif
                 }
-                iterStart = this->pOrgsAft[l][j].begin();
+                iterBegin = this->pOrgsAft[l][j].begin();
                 iterEnd = this->pOrgsAft[l][j].end();
-                for (iter = iterStart; iter != iterEnd; iter++)
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
@@ -386,9 +386,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                 // Special case when query overlaps only one partition, Lemma 3
                 if (!foundzero && !foundone)
                 {
-                    iterStart = this->pOrgsIn[l][a].begin();
-                    iterEnd = lower_bound(iterStart, this->pOrgsIn[l][a].end(), qdummyE);
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    iterBegin = this->pOrgsIn[l][a].begin();
+                    iterEnd = lower_bound(iterBegin, this->pOrgsIn[l][a].end(), qdummyE);
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
                         if (Q.start <= iter->end)
                         {
@@ -399,9 +399,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
 #endif
                         }
                     }
-                    iterStart = this->pOrgsAft[l][a].begin();
-                    iterEnd = lower_bound(iterStart, this->pOrgsAft[l][a].end(), qdummyE);
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    iterBegin = this->pOrgsAft[l][a].begin();
+                    iterEnd = lower_bound(iterBegin, this->pOrgsAft[l][a].end(), qdummyE);
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -412,9 +412,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                 }
                 else if (foundzero)
                 {
-                    iterStart = this->pOrgsIn[l][a].begin();
-                    iterEnd = lower_bound(iterStart, this->pOrgsIn[l][a].end(), qdummyE);
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    iterBegin = this->pOrgsIn[l][a].begin();
+                    iterEnd = lower_bound(iterBegin, this->pOrgsIn[l][a].end(), qdummyE);
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -422,9 +422,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                         result ^= iter->id;
 #endif
                     }
-                    iterStart = this->pOrgsAft[l][a].begin();
-                    iterEnd = lower_bound(iterStart, this->pOrgsAft[l][a].end(), qdummyE);
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    iterBegin = this->pOrgsAft[l][a].begin();
+                    iterEnd = lower_bound(iterBegin, this->pOrgsAft[l][a].end(), qdummyE);
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -435,9 +435,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                 }
                 else if (foundone)
                 {
-                    iterStart = this->pOrgsIn[l][a].begin();
+                    iterBegin = this->pOrgsIn[l][a].begin();
                     iterEnd = this->pOrgsIn[l][a].end();
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
                         if (Q.start <= iter->end)
                         {
@@ -448,9 +448,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
 #endif
                         }
                     }
-                    iterStart = this->pOrgsAft[l][a].begin();
+                    iterBegin = this->pOrgsAft[l][a].begin();
                     iterEnd = this->pOrgsAft[l][a].end();
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -465,9 +465,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                 // Lemma 1
                 if (!foundzero)
                 {
-                    iterStart = this->pOrgsIn[l][a].begin();
+                    iterBegin = this->pOrgsIn[l][a].begin();
                     iterEnd = this->pOrgsIn[l][a].end();
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
                         if (Q.start <= iter->end)
                         {
@@ -481,9 +481,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                 }
                 else
                 {
-                    iterStart = this->pOrgsIn[l][a].begin();
+                    iterBegin = this->pOrgsIn[l][a].begin();
                     iterEnd = this->pOrgsIn[l][a].end();
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -492,9 +492,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
 #endif
                     }
                 }
-                iterStart = this->pOrgsAft[l][a].begin();
+                iterBegin = this->pOrgsAft[l][a].begin();
                 iterEnd = this->pOrgsAft[l][a].end();
-                for (iter = iterStart; iter != iterEnd; iter++)
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
@@ -508,8 +508,8 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
             if (!foundzero)
             {
                 iterEnd = this->pRepsIn[l][a].end();
-                iterStart = lower_bound(this->pRepsIn[l][a].begin(), this->pRepsIn[l][a].end(), qdummyS, CompareRecordsByEnd);
-                for (iter = iterStart; iter != iterEnd; iter++)
+                iterBegin = lower_bound(this->pRepsIn[l][a].begin(), this->pRepsIn[l][a].end(), qdummyS, CompareRecordsByEnd);
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
@@ -520,9 +520,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
             }
             else
             {
-                iterStart = this->pRepsIn[l][a].begin();
+                iterBegin = this->pRepsIn[l][a].begin();
                 iterEnd = this->pRepsIn[l][a].end();
-                for (iter = iterStart; iter != iterEnd; iter++)
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
@@ -531,9 +531,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
 #endif
                 }
             }
-            iterStart = this->pRepsAft[l][a].begin();
+            iterBegin = this->pRepsAft[l][a].begin();
             iterEnd = this->pRepsAft[l][a].end();
-            for (iter = iterStart; iter != iterEnd; iter++)
+            for (iter = iterBegin; iter != iterEnd; iter++)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
@@ -549,9 +549,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                     // Handle the rest before the partition that contains b: consider only originals, no comparisons needed
                     for (auto j = a+1; j < b; j++)
                     {
-                        iterStart = this->pOrgsIn[l][j].begin();
+                        iterBegin = this->pOrgsIn[l][j].begin();
                         iterEnd = this->pOrgsIn[l][j].end();
-                        for (iter = iterStart; iter != iterEnd; iter++)
+                        for (iter = iterBegin; iter != iterEnd; iter++)
                         {
 #ifdef WORKLOAD_COUNT
                             result++;
@@ -559,9 +559,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                             result ^= iter->id;
 #endif
                         }
-                        iterStart = this->pOrgsAft[l][j].begin();
+                        iterBegin = this->pOrgsAft[l][j].begin();
                         iterEnd = this->pOrgsAft[l][j].end();
-                        for (iter = iterStart; iter != iterEnd; iter++)
+                        for (iter = iterBegin; iter != iterEnd; iter++)
                         {
 #ifdef WORKLOAD_COUNT
                             result++;
@@ -572,9 +572,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                     }
                     
                     // Handle the partition that contains b: consider only originals, comparisons needed
-                    iterStart = this->pOrgsIn[l][b].begin();
-                    iterEnd = lower_bound(iterStart, this->pOrgsIn[l][b].end(), qdummyE);
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    iterBegin = this->pOrgsIn[l][b].begin();
+                    iterEnd = lower_bound(iterBegin, this->pOrgsIn[l][b].end(), qdummyE);
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -582,9 +582,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                         result ^= iter->id;
 #endif
                     }
-                    iterStart = this->pOrgsAft[l][b].begin();
-                    iterEnd = lower_bound(iterStart, this->pOrgsAft[l][b].end(), qdummyE);
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    iterBegin = this->pOrgsAft[l][b].begin();
+                    iterEnd = lower_bound(iterBegin, this->pOrgsAft[l][b].end(), qdummyE);
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -597,9 +597,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                 {
                     for (auto j = a+1; j <= b; j++)
                     {
-                        iterStart = this->pOrgsIn[l][j].begin();
+                        iterBegin = this->pOrgsIn[l][j].begin();
                         iterEnd = this->pOrgsIn[l][j].end();
-                        for (iter = iterStart; iter != iterEnd; iter++)
+                        for (iter = iterBegin; iter != iterEnd; iter++)
                         {
 #ifdef WORKLOAD_COUNT
                             result++;
@@ -607,9 +607,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
                             result ^= iter->id;
 #endif
                         }
-                        iterStart = this->pOrgsAft[l][j].begin();
+                        iterBegin = this->pOrgsAft[l][j].begin();
                         iterEnd = this->pOrgsAft[l][j].end();
-                        for (iter = iterStart; iter != iterEnd; iter++)
+                        for (iter = iterBegin; iter != iterEnd; iter++)
                         {
 #ifdef WORKLOAD_COUNT
                             result++;
@@ -634,9 +634,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
     if (foundone && foundzero)
     {
         // All contents are guaranteed to be results
-        iterStart = this->pOrgsIn[this->numBits][0].begin();
+        iterBegin = this->pOrgsIn[this->numBits][0].begin();
         iterEnd = this->pOrgsIn[this->numBits][0].end();
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -648,9 +648,9 @@ size_t HINT_M_SubsSort::executeBottomUp_gOverlaps(RangeQuery Q)
     else
     {
         // Comparisons needed
-        iterStart = this->pOrgsIn[this->numBits][0].begin();
-        iterEnd = lower_bound(iterStart, this->pOrgsIn[this->numBits][0].end(), qdummyE);
-        for (iter = iterStart; iter != iterEnd; iter++)
+        iterBegin = this->pOrgsIn[this->numBits][0].begin();
+        iterEnd = lower_bound(iterBegin, this->pOrgsIn[this->numBits][0].end(), qdummyE);
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (Q.start <= iter->end)
             {

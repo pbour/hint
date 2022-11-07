@@ -171,7 +171,7 @@ inline void HINT_M_SubsSort_SS_CM::updatePartitions(const Record &r)
 HINT_M_SubsSort_SS_CM::HINT_M_SubsSort_SS_CM(const Relation &R, const unsigned int numBits, const unsigned int maxBits)  : HierarchicalIndex(R, numBits, maxBits)
 {
     OffsetEntry_SS_CM dummySE;
-    Offsets_SS_CM_Iterator iterSEO, iterSEOStart, iterSEOEnd;
+    Offsets_SS_CM_Iterator iterSEO, iterSEOBegin, iterSEOEnd;
     PartitionId tmp = -1;
     
     
@@ -373,10 +373,10 @@ HINT_M_SubsSort_SS_CM::HINT_M_SubsSort_SS_CM(const Relation &R, const unsigned i
                 tmp = -1;
                 if (l < this->height-1)
                 {
-                    iterSEOStart = this->pOrgsIn_ioffsets[l+1].begin();
+                    iterSEOBegin = this->pOrgsIn_ioffsets[l+1].begin();
                     iterSEOEnd = this->pOrgsIn_ioffsets[l+1].end();
-                    iterSEO = lower_bound(iterSEOStart, iterSEOEnd, dummySE);//, CompareOffsetsByTimestamp);
-                    tmp = (iterSEO != iterSEOEnd)? (iterSEO-iterSEOStart): -1;
+                    iterSEO = lower_bound(iterSEOBegin, iterSEOEnd, dummySE);//, CompareOffsetsByTimestamp);
+                    tmp = (iterSEO != iterSEOEnd)? (iterSEO-iterSEOBegin): -1;
                 }
                 this->pOrgsIn_ioffsets[l].push_back(OffsetEntry_SS_CM(pId, this->pOrgsInIds[l].begin()+sumOin, this->pOrgsInTimestamps[l].begin()+sumOin, tmp));
             }
@@ -388,10 +388,10 @@ HINT_M_SubsSort_SS_CM::HINT_M_SubsSort_SS_CM(const Relation &R, const unsigned i
                 tmp = -1;
                 if (l < this->height-1)
                 {
-                    iterSEOStart = this->pOrgsAft_ioffsets[l+1].begin();
+                    iterSEOBegin = this->pOrgsAft_ioffsets[l+1].begin();
                     iterSEOEnd = this->pOrgsAft_ioffsets[l+1].end();
-                    iterSEO = lower_bound(iterSEOStart, iterSEOEnd, dummySE);//, CompareOffsetsByTimestamp);
-                    tmp = (iterSEO != iterSEOEnd)? (iterSEO-iterSEOStart): -1;
+                    iterSEO = lower_bound(iterSEOBegin, iterSEOEnd, dummySE);//, CompareOffsetsByTimestamp);
+                    tmp = (iterSEO != iterSEOEnd)? (iterSEO-iterSEOBegin): -1;
                 }
                 this->pOrgsAft_ioffsets[l].push_back(OffsetEntry_SS_CM(pId, this->pOrgsAftIds[l].begin()+sumOaft, this->pOrgsAftTimestamps[l].begin()+sumOaft, tmp));
             }
@@ -403,10 +403,10 @@ HINT_M_SubsSort_SS_CM::HINT_M_SubsSort_SS_CM(const Relation &R, const unsigned i
                 tmp = -1;
                 if (l < this->height-1)
                 {
-                    iterSEOStart = this->pRepsIn_ioffsets[l+1].begin();
+                    iterSEOBegin = this->pRepsIn_ioffsets[l+1].begin();
                     iterSEOEnd = this->pRepsIn_ioffsets[l+1].end();
-                    iterSEO = lower_bound(iterSEOStart, iterSEOEnd, dummySE);//, CompareOffsetsByTimestamp);
-                    tmp = (iterSEO != iterSEOEnd)? (iterSEO-iterSEOStart): -1;
+                    iterSEO = lower_bound(iterSEOBegin, iterSEOEnd, dummySE);//, CompareOffsetsByTimestamp);
+                    tmp = (iterSEO != iterSEOEnd)? (iterSEO-iterSEOBegin): -1;
                 }
                 this->pRepsIn_ioffsets[l].push_back(OffsetEntry_SS_CM(pId, this->pRepsInIds[l].begin()+sumRin, this->pRepsInTimestamps[l].begin()+sumRin, tmp));
             }
@@ -418,10 +418,10 @@ HINT_M_SubsSort_SS_CM::HINT_M_SubsSort_SS_CM(const Relation &R, const unsigned i
                 tmp = -1;
                 if (l < this->height-1)
                 {
-                    iterSEOStart = this->pRepsAft_ioffsets[l+1].begin();
+                    iterSEOBegin = this->pRepsAft_ioffsets[l+1].begin();
                     iterSEOEnd = this->pRepsAft_ioffsets[l+1].end();
-                    iterSEO = lower_bound(iterSEOStart, iterSEOEnd, dummySE);//, CompareOffsetsByTimestamp);
-                    tmp = (iterSEO != iterSEOEnd)? (iterSEO-iterSEOStart): -1;
+                    iterSEO = lower_bound(iterSEOBegin, iterSEOEnd, dummySE);//, CompareOffsetsByTimestamp);
+                    tmp = (iterSEO != iterSEOEnd)? (iterSEO-iterSEOBegin): -1;
                 }
                 this->pRepsAft_ioffsets[l].push_back(OffsetEntry_SS_CM(pId, this->pRepsAftIds[l].begin()+sumRaft, this->pRepsAftTimestamps[l].begin()+sumRaft, tmp));
             }
@@ -490,10 +490,10 @@ HINT_M_SubsSort_SS_CM::~HINT_M_SubsSort_SS_CM()
 
 
 // Auxiliary functions to determine exactly how to scan a partition.
-inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp t, PartitionId &next_from, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, vector<pair<Timestamp, Timestamp> >::iterator &iterStart, vector<pair<Timestamp, Timestamp> >::iterator &iterEnd, RelationIdIterator &iterI)
+inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp t, PartitionId &next_from, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, vector<pair<Timestamp, Timestamp> >::iterator &iterBegin, vector<pair<Timestamp, Timestamp> >::iterator &iterEnd, RelationIdIterator &iterI)
 {
     OffsetEntry_SS_CM qdummy;
-    Offsets_SS_CM_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_SS_CM_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -503,14 +503,14 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp t, Pa
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = ioffsets[level].begin();
+            iterIOBegin = ioffsets[level].begin();
             iterIOEnd = ioffsets[level].end();
 
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareOffsetsByTimestamp);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareOffsetsByTimestamp);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
                 iterI = iterIO->iterI;
-                iterStart = iterIO->iterT;
+                iterBegin = iterIO->iterT;
                 iterEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterT : timestamps[level].end());
 
                 next_from =iterIO->pid;
@@ -539,7 +539,7 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp t, Pa
             if ((from != cnt) && ((ioffsets[level][from]).tstamp == t))
             {
                 iterI = (ioffsets[level][from]).iterI;
-                iterStart = (ioffsets[level][from]).iterT;
+                iterBegin = (ioffsets[level][from]).iterT;
                 iterEnd = ((from+1 != cnt) ? (ioffsets[level][from+1]).iterT : timestamps[level].end());
 
                 next_from = (ioffsets[level][from]).pid;
@@ -563,10 +563,10 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp t, Pa
 }
 
 
-inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp t, PartitionId &next_from, Offsets_SS_CM *ioffsets, RelationId *ids, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd)
+inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp t, PartitionId &next_from, Offsets_SS_CM *ioffsets, RelationId *ids, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd)
 {
     OffsetEntry_SS_CM qdummy;
-    Offsets_SS_CM_Iterator iterIO, iterIO2, iterIOStart, iterIOEnd;
+    Offsets_SS_CM_Iterator iterIO, iterIO2, iterIOBegin, iterIOEnd;
     size_t cnt = ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -576,12 +576,12 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp t, Pa
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = ioffsets[level].begin();
+            iterIOBegin = ioffsets[level].begin();
             iterIOEnd = ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareOffsetsByTimestamp);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareOffsetsByTimestamp);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp == t))
             {
-                iterIStart = iterIO->iterI;
+                iterIBegin = iterIO->iterI;
                 iterIEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterI : ids[level].end());
 
                 next_from =iterIO->pid;
@@ -609,7 +609,7 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp t, Pa
 
             if ((from != cnt) && ((ioffsets[level][from]).tstamp == t))
             {
-                iterIStart = (ioffsets[level][from]).iterI;
+                iterIBegin = (ioffsets[level][from]).iterI;
                 iterIEnd = ((from+1 != cnt) ? (ioffsets[level][from+1]).iterI : ids[level].end());
 
                 next_from = (ioffsets[level][from]).pid;
@@ -633,10 +633,10 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp t, Pa
 }
 
 
-inline bool HINT_M_SubsSort_SS_CM::getBoundsS(unsigned int level, Timestamp t, PartitionId &next_from, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd)
+inline bool HINT_M_SubsSort_SS_CM::getBoundsS(unsigned int level, Timestamp t, PartitionId &next_from, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd)
 {
     OffsetEntry_SS_CM qdummy;
-    Offsets_SS_CM_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_SS_CM_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -647,17 +647,17 @@ inline bool HINT_M_SubsSort_SS_CM::getBoundsS(unsigned int level, Timestamp t, P
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = ioffsets[level].begin();
+            iterIOBegin = ioffsets[level].begin();
             iterIOEnd = ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareOffsetsByTimestamp);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareOffsetsByTimestamp);
 //            if ((iterIO != iterIOEnd) && (get<0>(this->pOrgsIn_ioffsets[level][from]) >= t))
             if (iterIO != iterIOEnd)
             {
-                iterIStart = iterIO->iterI;
-//                iterStart = iterIO->iterT;
+                iterIBegin = iterIO->iterI;
+//                iterBegin = iterIO->iterT;
 ////                iterEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterT : this->pOrgsInTimestamps[level].end());
 //                iterEnd = timestamps[level].end();
-                iterIEnd = iterIStart + (timestamps[level].end()-iterIO->iterT);
+                iterIEnd = iterIBegin + (timestamps[level].end()-iterIO->iterT);
 
                 next_from =iterIO->pid;
                 
@@ -685,11 +685,11 @@ inline bool HINT_M_SubsSort_SS_CM::getBoundsS(unsigned int level, Timestamp t, P
 //            if ((from != cnt) && (get<0>(this->pOrgsIn_ioffsets[level][from]) >= b))
             if ((from != cnt) && (from != -1))
             {
-                iterIStart = (ioffsets[level][from]).iterI;
-//                iterStart = (ioffsets[level][from]).iterT;
+                iterIBegin = (ioffsets[level][from]).iterI;
+//                iterBegin = (ioffsets[level][from]).iterT;
 ////                iterEnd = ((from+1 != cnt) ? get<2>(this->pOrgsIn_ioffsets[level][from+1]) : this->pOrgsInTimestamps[level].end());
 //                iterEnd = timestamps[level].end();
-                iterIEnd = iterIStart + (timestamps[level].end()-(ioffsets[level][from]).iterT);
+                iterIEnd = iterIBegin + (timestamps[level].end()-(ioffsets[level][from]).iterT);
 
                 next_from = (ioffsets[level][from]).pid;
                 
@@ -711,11 +711,11 @@ inline bool HINT_M_SubsSort_SS_CM::getBoundsS(unsigned int level, Timestamp t, P
     }
 }
 
-inline bool HINT_M_SubsSort_SS_CM::getBoundsE(unsigned int level, Timestamp t, PartitionId &next_from, Offsets_SS_CM *ioffsets, RelationId *ids, vector<pair<Timestamp, Timestamp> > *timestamps, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd)
+inline bool HINT_M_SubsSort_SS_CM::getBoundsE(unsigned int level, Timestamp t, PartitionId &next_from, Offsets_SS_CM *ioffsets, RelationId *ids, vector<pair<Timestamp, Timestamp> > *timestamps, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd)
 
 {
     OffsetEntry_SS_CM qdummy;
-    Offsets_SS_CM_Iterator iterIO, iterIOStart, iterIOEnd;
+    Offsets_SS_CM_Iterator iterIO, iterIOBegin, iterIOEnd;
     size_t cnt = ioffsets[level].size();
     PartitionId from = next_from;
 
@@ -726,17 +726,17 @@ inline bool HINT_M_SubsSort_SS_CM::getBoundsE(unsigned int level, Timestamp t, P
         if ((from == -1) || (from > cnt))
         {
             qdummy.tstamp = t;
-            iterIOStart = ioffsets[level].begin();
+            iterIOBegin = ioffsets[level].begin();
             iterIOEnd = ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummy);//, CompareOffsetsByTimestamp);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummy);//, CompareOffsetsByTimestamp);
             iterIO--;
             if ((iterIO != iterIOEnd) && (iterIO->tstamp <= t))
             {
 //                iterI = iterIO->iterI;
-                iterIStart = ids[level].begin();
-//                iterStart = timestamps[level].begin();
+                iterIBegin = ids[level].begin();
+//                iterBegin = timestamps[level].begin();
 //                iterEnd = ((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterT : timestamps[level].end());
-                iterIEnd = iterIStart + (((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterT : timestamps[level].end()) - timestamps[level].begin());
+                iterIEnd = iterIBegin + (((iterIO+1 != iterIOEnd) ? (iterIO+1)->iterT : timestamps[level].end()) - timestamps[level].begin());
 
                 next_from =iterIO->pid;
 
@@ -765,10 +765,10 @@ inline bool HINT_M_SubsSort_SS_CM::getBoundsE(unsigned int level, Timestamp t, P
             if ((from != -1) && (from != cnt))
             {
 //                iterI = (ioffsets[level][from]).iterI;
-                iterIStart = ids[level].begin();
-//                iterStart = timestamps[level].begin();
+                iterIBegin = ids[level].begin();
+//                iterBegin = timestamps[level].begin();
 //                iterEnd = ((from+1 != cnt) ? (ioffsets[level][from+1]).iterT : timestamps[level].end());
-                iterIEnd = iterIStart + (((from+1 != cnt) ? (ioffsets[level][from+1]).iterT : timestamps[level].end()) - timestamps[level].begin());
+                iterIEnd = iterIBegin + (((from+1 != cnt) ? (ioffsets[level][from+1]).iterT : timestamps[level].end()) - timestamps[level].begin());
 
                 next_from = (ioffsets[level][from]).pid;
 
@@ -791,10 +791,10 @@ inline bool HINT_M_SubsSort_SS_CM::getBoundsE(unsigned int level, Timestamp t, P
 }
 
 
-inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp ts, Timestamp te, PartitionId &next_from, PartitionId &next_to, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, vector<pair<Timestamp, Timestamp> >::iterator &iterStart, vector<pair<Timestamp, Timestamp> >::iterator &iterEnd, RelationIdIterator &iterI)
+inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp ts, Timestamp te, PartitionId &next_from, PartitionId &next_to, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, vector<pair<Timestamp, Timestamp> >::iterator &iterBegin, vector<pair<Timestamp, Timestamp> >::iterator &iterEnd, RelationIdIterator &iterI)
 {
     OffsetEntry_SS_CM qdummyA, qdummyB;
-    Offsets_SS_CM_Iterator iterIO, iterIO2, iterIOStart, iterIOEnd;
+    Offsets_SS_CM_Iterator iterIO, iterIO2, iterIOBegin, iterIOEnd;
     size_t cnt = ioffsets[level].size();
     PartitionId from = next_from, to = next_to;
 
@@ -805,16 +805,16 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp ts, T
         if ((from == -1) || (to == -1))
         {
             qdummyA.tstamp = ts;
-            iterIOStart = ioffsets[level].begin();
+            iterIOBegin = ioffsets[level].begin();
             iterIOEnd = ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummyA);//, CompareOffsetsByTimestamp);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummyA);//, CompareOffsetsByTimestamp);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp <= te))
             {
                 next_from =iterIO->pid;
 
                 qdummyB.tstamp = te;
                 iterI = iterIO->iterI;
-                iterStart = iterIO->iterT;
+                iterBegin = iterIO->iterT;
 
                 iterIO2 = upper_bound(iterIO, iterIOEnd, qdummyB);//, CompareOffsetsByTimestamp);
 //                iterIO2 = iterIO;
@@ -870,7 +870,7 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp ts, T
             if ((from != cnt) && (from != -1) && (from < to))
             {
                 iterI = (ioffsets[level][from]).iterI;
-                iterStart = (ioffsets[level][from]).iterT;
+                iterBegin = (ioffsets[level][from]).iterT;
                 iterEnd   = (to != cnt)? (ioffsets[level][to]).iterT: timestamps[level].end();
 
                 next_from = (ioffsets[level][from]).pid;
@@ -896,10 +896,10 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp ts, T
 }
 
 
-inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp ts, Timestamp te, PartitionId &next_from, PartitionId &next_to, Offsets_SS_CM *ioffsets, RelationId *ids, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd)
+inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp ts, Timestamp te, PartitionId &next_from, PartitionId &next_to, Offsets_SS_CM *ioffsets, RelationId *ids, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd)
 {
     OffsetEntry_SS_CM qdummyTS, qdummyTE;
-    Offsets_SS_CM_Iterator iterIO, iterIO2, iterIOStart, iterIOEnd;
+    Offsets_SS_CM_Iterator iterIO, iterIO2, iterIOBegin, iterIOEnd;
     size_t cnt = ioffsets[level].size();
     PartitionId from = next_from, to = next_to;
 
@@ -913,15 +913,15 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp ts, T
         if ((from == -1) || (to == -1))
         {
             qdummyTS.tstamp = ts;
-            iterIOStart = ioffsets[level].begin();
+            iterIOBegin = ioffsets[level].begin();
             iterIOEnd = ioffsets[level].end();
-            iterIO = lower_bound(iterIOStart, iterIOEnd, qdummyTS);//, CompareOffsetsByTimestamp);
+            iterIO = lower_bound(iterIOBegin, iterIOEnd, qdummyTS);//, CompareOffsetsByTimestamp);
             if ((iterIO != iterIOEnd) && (iterIO->tstamp <= te))
             {
                 next_from =iterIO->pid;
 
                 qdummyTE.tstamp = te;
-                iterIStart = iterIO->iterI;
+                iterIBegin = iterIO->iterI;
 
                 iterIO2 = upper_bound(iterIO, iterIOEnd, qdummyTE);//, CompareOffsetsByTimestamp);
 //                iterIO2 = iterIO;
@@ -976,7 +976,7 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp ts, T
 
             if ((from != cnt) && (from != -1) && (from < to))
             {
-                iterIStart = (ioffsets[level][from]).iterI;
+                iterIBegin = (ioffsets[level][from]).iterI;
                 iterIEnd   = (to != cnt)? (ioffsets[level][to]).iterI: ids[level].end();
 
                 next_from = (ioffsets[level][from]).pid;
@@ -1004,14 +1004,14 @@ inline bool HINT_M_SubsSort_SS_CM::getBounds(unsigned int level, Timestamp ts, T
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Equals(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qstart, qstart), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qstart, qstart), compare);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qstart == iter->first))
         {
             if (qend == iter->second)
@@ -1031,14 +1031,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Equals(unsi
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Starts(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qstart, qstart), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qstart, qstart), compare);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qstart == iter->first))
         {
             if (qend < iter->second)
@@ -1058,14 +1058,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Starts(unsi
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckStart_Starts(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qt, qt), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qt, qt), compare);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qt == iter->first))
         {
 #ifdef WORKLOAD_COUNT
@@ -1083,14 +1083,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckStart_Starts(unsigned int 
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Started(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qstart, qstart), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qstart, qstart), compare);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qstart == iter->first))
         {
             if (qend > iter->second)
@@ -1110,14 +1110,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Started(uns
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Finishes(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qstart, qstart), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qstart, qstart), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (qend == iter->second)
             {
@@ -1135,14 +1135,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Finishes(un
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps2_Finishes(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qend, qend), compare);
-        iterI += (iter-iterStart);
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qend, qend), compare);
+        iterI += (iter-iterBegin);
         while ((iter != iterEnd) && (qend == iter->second))
         {
             if (qstart > iter->first)
@@ -1162,14 +1162,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps2_Finishes(u
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_Finishes(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qt, qt), compare);
-        iterI += (iter-iterStart);
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qt, qt), compare);
+        iterI += (iter-iterBegin);
         while ((iter != iterEnd) && (qt == iter->second))
         {
 #ifdef WORKLOAD_COUNT
@@ -1187,14 +1187,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_Finishes(unsigned int 
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Finished(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qstart+1, qstart+1), compare);
-        iterI += (iter-iterStart);
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qstart+1, qstart+1), compare);
+        iterI += (iter-iterBegin);
         while (iter != iterEnd)
         {
             if (qend == iter->second)
@@ -1214,14 +1214,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Finished(un
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps2_Finished(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qend, qend), compare);
-        iterI += (iter-iterStart);
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qend, qend), compare);
+        iterI += (iter-iterBegin);
         while ((iter != iterEnd) && (qend == iter->second))
         {
             if (qstart < iter->first)
@@ -1241,13 +1241,13 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps2_Finished(u
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_Finished(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qt == iter->second)
             {
@@ -1265,14 +1265,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_Finished(unsigned int 
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_Met(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qt, qt), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qt, qt), compare);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qt == iter->second))
         {
 #ifdef WORKLOAD_COUNT
@@ -1290,14 +1290,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_Met(unsigned int level
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckAllConditions_Overlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qstart+1, qstart+1), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qstart+1, qstart+1), compare);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qend > iter->first))
         {
             if (qend < iter->second)
@@ -1317,14 +1317,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckAllConditions_Overlaps(uns
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions1_Overlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qstart+1, qstart+1), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qstart+1, qstart+1), compare);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qend > iter->first))
         {
 #ifdef WORKLOAD_COUNT
@@ -1342,14 +1342,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions1_Overlaps(un
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions2_Overlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qstart+1, qstart+1), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qstart+1, qstart+1), compare);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
             if (qend < iter->second)
@@ -1369,14 +1369,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions2_Overlaps(un
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckOneCondition_Overlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qt, qt), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qt, qt), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1392,13 +1392,13 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckOneCondition_Overlaps(unsi
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckOneCondition2_Overlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qt < iter->first)
             {
@@ -1415,14 +1415,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckOneCondition2_Overlaps(uns
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions_Overlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qt, qt), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qt, qt), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (qt < iter->second)
             {
@@ -1440,11 +1440,11 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions_Overlaps(uns
 
 inline void HINT_M_SubsSort_SS_CM::scanPartitions_CheckOneCondition_Overlaps(unsigned int level, Timestamp ts, Timestamp te, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, Timestamp qt, PartitionId &next_from, PartitionId &next_to, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
 
 
-    if (this->getBounds(level, ts, te, next_from, next_to, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, ts, te, next_from, next_to, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
         {
             if (qt < iter->second)
@@ -1463,14 +1463,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartitions_CheckOneCondition_Overlaps(uns
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions3_Overlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qend+1, qend+1), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qend+1, qend+1), compare);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
             if (qstart < iter->first)
@@ -1490,14 +1490,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions3_Overlaps(un
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckAllConditions_Overlapped(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qstart, qstart), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qstart, qstart), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if ((qstart < iter->second) && (qend > iter->second))
             {
@@ -1515,14 +1515,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckAllConditions_Overlapped(u
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions1_Overlapped(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qstart+1, qstart+1), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qstart+1, qstart+1), compare);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (qend > iter->second))
         {
 #ifdef WORKLOAD_COUNT
@@ -1540,14 +1540,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions1_Overlapped(
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions2_Overlapped(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qt, qt), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qt, qt), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (qt < iter->second)
             {
@@ -1565,14 +1565,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions2_Overlapped(
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions3_Overlapped(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qend, qend), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qend, qend), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (qstart > iter->first)
             {
@@ -1590,14 +1590,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions3_Overlapped(
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions4_Overlapped(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qstart, qstart), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qstart, qstart), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (qend > iter->second)
             {
@@ -1615,13 +1615,13 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckTwoConditions4_Overlapped(
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckOneCondition_Overlapped(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qt < iter->second)
             {
@@ -1639,14 +1639,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckOneCondition_Overlapped(un
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckOneCondition_Overlapped(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qstart+1, qstart+1), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qstart+1, qstart+1), compare);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -1663,13 +1663,13 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckOneCondition_Overlapped(un
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_Overlapped(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qend > iter->second)
             {
@@ -1688,13 +1688,13 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_Overlapped(unsigned in
 
 inline void HINT_M_SubsSort_SS_CM::scanPartitions_CheckOneCondition_Overlapped(unsigned int level, Timestamp ts, Timestamp te, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, Timestamp qt, PartitionId &next_from, PartitionId &next_to, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
 
 
-    if (this->getBounds(level, ts, te, next_from, next_to, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, ts, te, next_from, next_to, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qt > iter->first)
             {
@@ -1715,14 +1715,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartitions_CheckOneCondition_Overlapped(u
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Contains(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qstart+1, qstart+1), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qstart+1, qstart+1), compare);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
             if (qend > iter->second)
@@ -1742,14 +1742,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Contains(un
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckStart_Contains(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qstart+1, qstart+1), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qstart+1, qstart+1), compare);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -1768,13 +1768,13 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckStart_Contains(unsigned in
 
 inline void HINT_M_SubsSort_SS_CM::scanPartitions_CheckEnd_Contains(unsigned int level, Timestamp ts, Timestamp te, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, Timestamp qt, PartitionId &next_from, PartitionId &next_to, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
 
 
-    if (this->getBounds(level, ts, te, next_from, next_to, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, ts, te, next_from, next_to, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qt > iter->second)
             {
@@ -1791,14 +1791,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartitions_CheckEnd_Contains(unsigned int
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Contained(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qstart, qstart), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qstart, qstart), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (qend < iter->second)
             {
@@ -1816,14 +1816,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_Contained(u
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckStart_Contained(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qt, qt), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qt, qt), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1839,14 +1839,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckStart_Contained(unsigned i
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_Contained(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qt+1, qt+1), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qt+1, qt+1), compare);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -1864,14 +1864,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_Contained(unsigned int
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_Precedes(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qt, qt), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qt, qt), compare);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -1889,12 +1889,12 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_Precedes(unsigned int level, Ti
 
 inline void HINT_M_SubsSort_SS_CM::scanPartitions_Precedes(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, PartitionId &next_from, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
 
 
-    if (this->getBoundsS(level, t, next_from, ioffsets, timestamps, iterIStart, iterIEnd))
+    if (this->getBoundsS(level, t, next_from, ioffsets, timestamps, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1908,13 +1908,13 @@ inline void HINT_M_SubsSort_SS_CM::scanPartitions_Precedes(unsigned int level, T
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_Preceded(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qt > iter->second)
             {
@@ -1932,14 +1932,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_Preceded(unsigned int level, Ti
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_Preceded(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qt, qt), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qt, qt), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1955,12 +1955,12 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_Preceded(unsigned int level, Ti
 
 inline void HINT_M_SubsSort_SS_CM::scanPartitions_Preceded(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, RelationId *ids, vector<pair<Timestamp, Timestamp> > *timestamps, PartitionId &next_from, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
 
 
-    if (this->getBoundsE(level, t, next_from, ioffsets, ids, timestamps, iterIStart, iterIEnd))
+    if (this->getBoundsE(level, t, next_from, ioffsets, ids, timestamps, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -1974,14 +1974,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartitions_Preceded(unsigned int level, T
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_gOverlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qstart, Timestamp qend, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qend+1, qend+1), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qend+1, qend+1), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (qstart <= iter->second)
             {
@@ -1999,13 +1999,13 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckBothTimestamps_gOverlaps(u
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_gOverlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (qt <= iter->second)
             {
@@ -2023,14 +2023,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_gOverlaps(unsigned int
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_gOverlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        iter = lower_bound(iterStart, iterEnd, make_pair(qt, qt), compare);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(qt, qt), compare);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -2048,14 +2048,14 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckEnd_gOverlaps(unsigned int
 
 inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckStart_gOverlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), Timestamp qt, PartitionId &next_from, size_t &result)
 {
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterStart, iterEnd, iterI))
+    if (this->getBounds(level, t, next_from, ioffsets, timestamps, iterBegin, iterEnd, iterI))
     {
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(qt+1, qt+1), compare);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(qt+1, qt+1), compare);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -2069,15 +2069,15 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_CheckStart_gOverlaps(unsigned i
 }
 
 
-inline bool getBounds(unsigned int level, Timestamp t, PartitionId &next_from, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, RelationIdIterator &iterIStart, RelationIdIterator &iterIEnd);
+inline bool getBounds(unsigned int level, Timestamp t, PartitionId &next_from, Offsets_SS_CM *ioffsets, vector<pair<Timestamp, Timestamp> > *timestamps, RelationIdIterator &iterIBegin, RelationIdIterator &iterIEnd);
 inline void HINT_M_SubsSort_SS_CM::scanPartition_NoChecks_gOverlaps(unsigned int level, Timestamp t, Offsets_SS_CM *ioffsets, RelationId *ids, PartitionId &next_from, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
 
 
-    if (this->getBounds(level, t, next_from, ioffsets, ids, iterIStart, iterIEnd))
+    if (this->getBounds(level, t, next_from, ioffsets, ids, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -2091,13 +2091,13 @@ inline void HINT_M_SubsSort_SS_CM::scanPartition_NoChecks_gOverlaps(unsigned int
 
 inline void HINT_M_SubsSort_SS_CM::scanPartitions_NoChecks_gOverlaps(unsigned int level, Timestamp ts, Timestamp te, Offsets_SS_CM *ioffsets, RelationId *ids, PartitionId &next_from, PartitionId &next_to, size_t &result)
 {
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     OffsetEntry_SS_CM qdummyTS, qdummyTE;
 
 
-    if (this->getBounds(level, ts, te, next_from, next_to, ioffsets, ids, iterIStart, iterIEnd))
+    if (this->getBounds(level, ts, te, next_from, next_to, ioffsets, ids, iterIBegin, iterIEnd))
     {
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -2113,7 +2113,7 @@ inline void HINT_M_SubsSort_SS_CM::scanPartitions_NoChecks_gOverlaps(unsigned in
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Equals(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -2215,10 +2215,10 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Equals(RangeQuery Q)
 //    {
 //        // Comparisons needed
 //        iterI = this->pOrgsInIds[this->numBits].begin();
-//        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+//        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
 //        iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-//        iter = lower_bound(iterStart, iterEnd, make_pair(Q.start, Q.start), CompareTimestampPairsByStart);
-//        iterI += iter-iterStart;
+//        iter = lower_bound(iterBegin, iterEnd, make_pair(Q.start, Q.start), CompareTimestampPairsByStart);
+//        iterI += iter-iterBegin;
 //        while ((iter != iterEnd) && (Q.start == iter->first))
 //        {
 //            if (Q.end == iter->second)
@@ -2236,7 +2236,7 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Equals(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Starts(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -2273,10 +2273,10 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Starts(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterStart, iterEnd, make_pair(Q.start, Q.start), CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(Q.start, Q.start), CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (Q.start == iter->first))
         {
             if (Q.end < iter->second)
@@ -2300,7 +2300,7 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Starts(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Started(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -2337,10 +2337,10 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Started(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterStart, iterEnd, make_pair(Q.start, Q.start), CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(Q.start, Q.start), CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (Q.start == iter->first))
         {
             if (Q.end > iter->second)
@@ -2364,7 +2364,7 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Started(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Finishes(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -2401,10 +2401,10 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Finishes(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, iterEnd, make_pair(Q.start, Q.start), CompareTimestampPairsByStart);
-        for (iter = iterStart; iter != pivot; iter++)
+        vector<pair<Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(Q.start, Q.start), CompareTimestampPairsByStart);
+        for (iter = iterBegin; iter != pivot; iter++)
         {
             if (Q.end == iter->second)
             {
@@ -2426,7 +2426,7 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Finishes(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Finished(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -2463,10 +2463,10 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Finished(RangeQuery Q)
     if (!foundzero)
     {
         // Comparisons needed
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterStart, iterEnd, make_pair(Q.start+1, Q.start+1), CompareTimestampPairsByStart);
-        iterI = this->pOrgsInIds[this->numBits].begin() + (iter-iterStart);
+        iter = lower_bound(iterBegin, iterEnd, make_pair(Q.start+1, Q.start+1), CompareTimestampPairsByStart);
+        iterI = this->pOrgsInIds[this->numBits].begin() + (iter-iterBegin);
         while (iter != iterEnd)
         {
             if (Q.end == iter->second)
@@ -2490,7 +2490,7 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Finished(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Meets(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
     pair<Timestamp, Timestamp> qdummyE(Q.end, Q.end);
@@ -2522,10 +2522,10 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Meets(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterStart, iterEnd, make_pair<Timestamp, Timestamp>(Q.end+0, Q.end+0), CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair<Timestamp, Timestamp>(Q.end+0, Q.end+0), CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while ((iter != iterEnd) && (Q.end == iter->first))
         {
 #ifdef WORKLOAD_COUNT
@@ -2547,7 +2547,7 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Meets(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Met(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     pair<Timestamp, Timestamp> qdummyE(Q.start, Q.start);
@@ -2578,10 +2578,10 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Met(RangeQuery Q)
     if (foundzero)
     {
         // Comparisons needed
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
         iterI = this->pOrgsInIds[this->numBits].begin();
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (Q.start == iter->second)
             {
@@ -2603,8 +2603,8 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Met(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Overlaps(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end   >> (this->maxBits-this->numBits); // prefix
     bool foundzero = false;
@@ -2668,18 +2668,18 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Overlaps(RangeQuery Q)
 //    if (foundone && foundzero)
 //    {
 //        // All contents are guaranteed to be results
-//        iterIStart = this->pOrgsInIds[this->numBits].begin();
+//        iterIBegin = this->pOrgsInIds[this->numBits].begin();
 //        iterIEnd = this->pOrgsInIds[this->numBits].end();
-//        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+//        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
 //            result ^= (*iterI);
 //    }
 //    else
 //    {
 //        // Comparisons needed
 //        iterI = this->pOrgsInIds[this->numBits].begin();
-//        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
-//        iterEnd = lower_bound(iterStart, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampPairsByStart);
-//        for (iter = iterStart; iter != iterEnd; iter++)
+//        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
+//        iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampPairsByStart);
+//        for (iter = iterBegin; iter != iterEnd; iter++)
 //        {
 //            if (Q.start <= iter->second)
 //                result ^= (*iterI);
@@ -2695,8 +2695,8 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Overlaps(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Overlapped(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end   >> (this->maxBits-this->numBits); // prefix
     bool foundzero = false;
@@ -2770,18 +2770,18 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Overlapped(RangeQuery Q)
 //    if (foundone && foundzero)
 //    {
 //        // All contents are guaranteed to be results
-//        iterIStart = this->pOrgsInIds[this->numBits].begin();
+//        iterIBegin = this->pOrgsInIds[this->numBits].begin();
 //        iterIEnd = this->pOrgsInIds[this->numBits].end();
-//        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+//        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
 //            result ^= (*iterI);
 //    }
 //    else
 //    {
 //        // Comparisons needed
 //        iterI = this->pOrgsInIds[this->numBits].begin();
-//        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
-//        iterEnd = lower_bound(iterStart, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampPairsByStart);
-//        for (iter = iterStart; iter != iterEnd; iter++)
+//        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
+//        iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampPairsByStart);
+//        for (iter = iterBegin; iter != iterEnd; iter++)
 //        {
 //            if (Q.start <= iter->second)
 //                result ^= (*iterI);
@@ -2797,7 +2797,7 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Overlapped(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Contains(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -2851,10 +2851,10 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Contains(RangeQuery Q)
     if (!(foundone && foundzero))
     {
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterStart, iterEnd, make_pair(Q.start+1, Q.start+1));
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(Q.start+1, Q.start+1));
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
             if (Q.end > iter->second)
@@ -2878,7 +2878,7 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Contains(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Contained(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
     RelationIdIterator iterI;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
@@ -2917,9 +2917,9 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Contained(RangeQuery Q)
 //    {
         // Comparisons needed
     iterI = this->pOrgsInIds[this->numBits].begin();
-    iterStart = this->pOrgsInTimestamps[this->numBits].begin();
-    vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterStart, this->pOrgsInTimestamps[this->numBits].end(), make_pair(Q.start, Q.start), CompareTimestampPairsByStart);
-    for (iter = iterStart; iter != pivot; iter++)
+    iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
+    vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits].end(), make_pair(Q.start, Q.start), CompareTimestampPairsByStart);
+    for (iter = iterBegin; iter != pivot; iter++)
     {
         if (Q.end < iter->second)
         {
@@ -2941,8 +2941,8 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Contained(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Precedes(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp b = Q.end >> (this->maxBits-this->numBits); // prefix
     bool foundzero = false;
     bool foundone = false;
@@ -2978,10 +2978,10 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Precedes(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterStart, iterEnd, make_pair(Q.end+1, Q.end+1), CompareTimestampPairsByStart);
-        iterI += iter-iterStart;
+        iter = lower_bound(iterBegin, iterEnd, make_pair(Q.end+1, Q.end+1), CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
 #ifdef WORKLOAD_COUNT
@@ -2996,9 +2996,9 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Precedes(RangeQuery Q)
     }
     else
     {
-        iterIStart = this->pOrgsInIds[this->numBits].begin();
+        iterIBegin = this->pOrgsInIds[this->numBits].begin();
         iterIEnd = this->pOrgsInIds[this->numBits].end();
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3016,8 +3016,8 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Precedes(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Preceded(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     bool foundzero = false;
     bool foundone = false;
@@ -3055,10 +3055,10 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Preceded(RangeQuery Q)
     if (!foundzero)
     {
         // Comparisons needed
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
         iterI = this->pOrgsInIds[this->numBits].begin();
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (Q.start > iter->second)
             {
@@ -3074,9 +3074,9 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Preceded(RangeQuery Q)
     }
     else
     {
-        iterIStart = this->pOrgsInIds[this->numBits].begin();
+        iterIBegin = this->pOrgsInIds[this->numBits].begin();
         iterIEnd = this->pOrgsInIds[this->numBits].end();
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3095,8 +3095,8 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Preceded(RangeQuery Q)
 size_t HINT_M_SubsSort_SS_CM::executeBottomUp_gOverlaps(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    RelationIdIterator iterI, iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end   >> (this->maxBits-this->numBits); // prefix
     bool foundzero = false;
@@ -3164,9 +3164,9 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_gOverlaps(RangeQuery Q)
     if (foundone && foundzero)
     {
         // All contents are guaranteed to be results
-        iterIStart = this->pOrgsInIds[this->numBits].begin();
+        iterIBegin = this->pOrgsInIds[this->numBits].begin();
         iterIEnd = this->pOrgsInIds[this->numBits].end();
-        for (iterI = iterIStart; iterI != iterIEnd; iterI++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -3179,9 +3179,9 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_gOverlaps(RangeQuery Q)
     {
         // Comparisons needed
         iterI = this->pOrgsInIds[this->numBits].begin();
-        iterStart = this->pOrgsInTimestamps[this->numBits].begin();
-        iterEnd = lower_bound(iterStart, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampPairsByStart);
-        for (iter = iterStart; iter != iterEnd; iter++)
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
+        iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampPairsByStart);
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (Q.start <= iter->second)
             {

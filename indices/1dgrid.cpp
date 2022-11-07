@@ -137,7 +137,7 @@ void OneDimensionalGrid::getStats()
 size_t OneDimensionalGrid::execute_Equals(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iterBegin, iterEnd;
     auto s_pId = (Q.start == this->gend)? this->numPartitionsMinus1: Q.start/this->partitionExtent;
     
     // Handle the first partition.
@@ -148,7 +148,7 @@ size_t OneDimensionalGrid::execute_Equals(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Starts(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iterBegin, iterEnd;
     auto s_pId = (Q.start == this->gend)? this->numPartitionsMinus1: Q.start/this->partitionExtent;
     
     // Handle the first partition.
@@ -159,7 +159,7 @@ size_t OneDimensionalGrid::execute_Starts(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Started(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iterBegin, iterEnd;
     auto s_pId = (Q.start == this->gend)? this->numPartitionsMinus1: Q.start/this->partitionExtent;
     
     // Handle the first partition.
@@ -170,7 +170,7 @@ size_t OneDimensionalGrid::execute_Started(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Finishes(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iterBegin, iterEnd;
     auto e_pId = (Q.end == this->gend)? this->numPartitionsMinus1: Q.end/this->partitionExtent;
 
     // Handle the last partition.
@@ -181,7 +181,7 @@ size_t OneDimensionalGrid::execute_Finishes(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Finished(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iterBegin, iterEnd;
     auto e_pId = (Q.end == this->gend)? this->numPartitionsMinus1: Q.end/this->partitionExtent;
 
     // Handle the last partition.
@@ -192,7 +192,7 @@ size_t OneDimensionalGrid::execute_Finished(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Meets(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iterBegin, iterEnd;
     auto e_pId = (Q.end == this->gend)? this->numPartitionsMinus1: Q.end/this->partitionExtent;
 
     // Handle the last partition.
@@ -203,7 +203,7 @@ size_t OneDimensionalGrid::execute_Meets(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Met(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iterBegin, iterEnd;
     auto s_pId = (Q.start == this->gend)? this->numPartitionsMinus1: Q.start/this->partitionExtent;
     
     // Handle the first partition.
@@ -214,15 +214,15 @@ size_t OneDimensionalGrid::execute_Met(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Overlaps(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iter, iterBegin, iterEnd;
     auto s_pId = (Q.start == this->gend)? this->numPartitionsMinus1: Q.start/this->partitionExtent;
     auto e_pId = (Q.end   == this->gend)? this->numPartitionsMinus1: Q.end/this->partitionExtent;
     
     
     // Handle the first partition.
-    iterStart = this->pRecs[s_pId].begin();
+    iterBegin = this->pRecs[s_pId].begin();
     iterEnd   = this->pRecs[s_pId].end();
-    for (RelationIterator iter = iterStart; iter != iterEnd; iter++)
+    for (iter = iterBegin; iter != iterEnd; iter++)
     {
         if ((iter->start < Q.end) && (Q.start < iter->end) && (Q.start < iter->start) && (Q.end < iter->end))
         {
@@ -238,9 +238,9 @@ size_t OneDimensionalGrid::execute_Overlaps(RangeQuery Q)
     for (auto pId = s_pId+1; pId < e_pId; pId++)
     {
         Relation &p = this->pRecs[pId];
-        iterStart = p.begin();
+        iterBegin = p.begin();
         iterEnd = p.end();
-        for (RelationIterator iter = p.begin(); iter != iterEnd; iter++)
+        for (iter = p.begin(); iter != iterEnd; iter++)
         {
             // Perform de-duplication test.
 //            if (max(Q.start, iter->start) >= p.gstart)
@@ -258,9 +258,9 @@ size_t OneDimensionalGrid::execute_Overlaps(RangeQuery Q)
     // Handle the last partition.
     if (e_pId != s_pId)
     {
-        iterStart = this->pRecs[e_pId].begin();
+        iterBegin = this->pRecs[e_pId].begin();
         iterEnd = this->pRecs[e_pId].end();
-        for (RelationIterator iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if ((iter->start < Q.end) && (Q.end < iter->end) && (iter->start >= this->pRecs[e_pId].gstart))
             {
@@ -281,15 +281,15 @@ size_t OneDimensionalGrid::execute_Overlaps(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Overlapped(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iter, iterBegin, iterEnd;
     auto s_pId = (Q.start == this->gend)? this->numPartitionsMinus1: Q.start/this->partitionExtent;
     auto e_pId = (Q.end   == this->gend)? this->numPartitionsMinus1: Q.end/this->partitionExtent;
     
     
     // Handle the first partition.
-    iterStart = this->pRecs[s_pId].begin();
+    iterBegin = this->pRecs[s_pId].begin();
     iterEnd   = this->pRecs[s_pId].end();
-    for (RelationIterator iter = iterStart; iter != iterEnd; iter++)
+    for (iter = iterBegin; iter != iterEnd; iter++)
     {
         if ((Q.start < iter->end) && (Q.start > iter->start) && (Q.end > iter->end))
         {
@@ -308,15 +308,15 @@ size_t OneDimensionalGrid::execute_Overlapped(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Contains(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iter, iterBegin, iterEnd;
     auto s_pId = (Q.start == this->gend)? this->numPartitionsMinus1: Q.start/this->partitionExtent;
     auto e_pId = (Q.end   == this->gend)? this->numPartitionsMinus1: Q.end/this->partitionExtent;
     
     
     // Handle the first partition.
-    iterStart = this->pRecs[s_pId].begin();
+    iterBegin = this->pRecs[s_pId].begin();
     iterEnd   = this->pRecs[s_pId].end();
-    for (RelationIterator iter = iterStart; iter != iterEnd; iter++)
+    for (iter = iterBegin; iter != iterEnd; iter++)
     {
         if ((iter->start > Q.start) && (Q.end > iter->end))
         {
@@ -332,9 +332,9 @@ size_t OneDimensionalGrid::execute_Contains(RangeQuery Q)
     for (auto pId = s_pId+1; pId < e_pId; pId++)
     {
         Relation &p = this->pRecs[pId];
-        iterStart = p.begin();
+        iterBegin = p.begin();
         iterEnd = p.end();
-        for (RelationIterator iter = p.begin(); iter != iterEnd; iter++)
+        for (iter = p.begin(); iter != iterEnd; iter++)
         {
             // Perform de-duplication test.
 //            if (max(Q.start, iter->start) >= p.gstart)
@@ -352,9 +352,9 @@ size_t OneDimensionalGrid::execute_Contains(RangeQuery Q)
     // Handle the last partition.
     if (e_pId != s_pId)
     {
-        iterStart = this->pRecs[e_pId].begin();
+        iterBegin = this->pRecs[e_pId].begin();
         iterEnd = this->pRecs[e_pId].end();
-        for (RelationIterator iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 //            if ((max(Q.start, iter->start) >= this->pRecs[e_pId].gstart) && (iter->start <= Q.end && Q.start <= iter->end))
             if ((iter->start >= this->pRecs[e_pId].gstart) && (iter->start > Q.start) && (Q.end > iter->end))
@@ -376,7 +376,7 @@ size_t OneDimensionalGrid::execute_Contains(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Contained(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iterBegin, iterEnd;
     auto s_pId = (Q.start == this->gend)? this->numPartitionsMinus1: Q.start/this->partitionExtent;
     
     return this->pRecs[s_pId].execute_Contained(Q);
@@ -387,15 +387,15 @@ size_t OneDimensionalGrid::execute_Contained(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Precedes(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iter, iterBegin, iterEnd;
     auto s_pId = (Q.end == this->gend)? this->numPartitionsMinus1: Q.end/this->partitionExtent;
     auto e_pId = this->numPartitionsMinus1;
     
     
     // Handle the first partition.
-    iterStart = this->pRecs[s_pId].begin();
+    iterBegin = this->pRecs[s_pId].begin();
     iterEnd   = this->pRecs[s_pId].end();
-    for (RelationIterator iter = iterStart; iter != iterEnd; iter++)
+    for (iter = iterBegin; iter != iterEnd; iter++)
     {
         if (iter->start > Q.end)
         {
@@ -410,9 +410,9 @@ size_t OneDimensionalGrid::execute_Precedes(RangeQuery Q)
     for (auto pId = s_pId+1; pId <= e_pId; pId++)
     {
         Relation &p = this->pRecs[pId];
-        iterStart = p.begin();
+        iterBegin = p.begin();
         iterEnd = p.end();
-        for (RelationIterator iter = p.begin(); iter != iterEnd; iter++)
+        for (iter = p.begin(); iter != iterEnd; iter++)
         {
             if (iter->start >= p.gstart)
             {
@@ -431,15 +431,15 @@ size_t OneDimensionalGrid::execute_Precedes(RangeQuery Q)
 size_t OneDimensionalGrid::execute_Preceded(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iter, iterBegin, iterEnd;
     auto s_pId = 0;
     auto e_pId = (Q.start == this->gend)? this->numPartitionsMinus1: Q.start/this->partitionExtent;
     
     
     // Handle the first partition.
-    iterStart = this->pRecs[s_pId].begin();
+    iterBegin = this->pRecs[s_pId].begin();
     iterEnd   = this->pRecs[s_pId].end();
-    for (RelationIterator iter = iterStart; iter != iterEnd; iter++)
+    for (iter = iterBegin; iter != iterEnd; iter++)
     {
         if (iter->end < Q.start)
         {
@@ -455,9 +455,9 @@ size_t OneDimensionalGrid::execute_Preceded(RangeQuery Q)
     for (auto pId = s_pId+1; pId <= e_pId; pId++)
     {
         Relation &p = this->pRecs[pId];
-        iterStart = p.begin();
+        iterBegin = p.begin();
         iterEnd = p.end();
-        for (RelationIterator iter = p.begin(); iter != iterEnd; iter++)
+        for (iter = p.begin(); iter != iterEnd; iter++)
         {
             if ((iter->start >= p.gstart) && (iter->end <  Q.start))
             {
@@ -477,7 +477,7 @@ size_t OneDimensionalGrid::execute_Preceded(RangeQuery Q)
 size_t OneDimensionalGrid::execute_gOverlaps(StabbingQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iterBegin, iterEnd;
     auto pId = (Q.point == this->gend)? this->numPartitionsMinus1: Q.point/this->partitionExtent;
     
     
@@ -489,15 +489,15 @@ size_t OneDimensionalGrid::execute_gOverlaps(StabbingQuery Q)
 size_t OneDimensionalGrid::execute_gOverlaps(RangeQuery Q)
 {
     size_t result = 0;
-    RelationIterator iterStart, iterEnd;
+    RelationIterator iter, iterBegin, iterEnd;
     auto s_pId = (Q.start == this->gend)? this->numPartitionsMinus1: Q.start/this->partitionExtent;
     auto e_pId = (Q.end   == this->gend)? this->numPartitionsMinus1: Q.end/this->partitionExtent;
     
     
     // Handle the first partition.
-    iterStart = this->pRecs[s_pId].begin();
+    iterBegin = this->pRecs[s_pId].begin();
     iterEnd   = this->pRecs[s_pId].end();
-    for (RelationIterator iter = iterStart; iter != iterEnd; iter++)
+    for (RelationIterator iter = iterBegin; iter != iterEnd; iter++)
     {
         if ((iter->start <= Q.end) && (Q.start <= iter->end))
         {
@@ -513,9 +513,9 @@ size_t OneDimensionalGrid::execute_gOverlaps(RangeQuery Q)
     for (auto pId = s_pId+1; pId < e_pId; pId++)
     {
         Relation &p = this->pRecs[pId];
-        iterStart = p.begin();
+        iterBegin = p.begin();
         iterEnd = p.end();
-        for (RelationIterator iter = p.begin(); iter != iterEnd; iter++)
+        for (iter = p.begin(); iter != iterEnd; iter++)
         {
             // Perform de-duplication test.
 //            if (max(Q.start, iter->start) >= p.gstart)
@@ -533,9 +533,9 @@ size_t OneDimensionalGrid::execute_gOverlaps(RangeQuery Q)
     // Handle the last partition.
     if (e_pId != s_pId)
     {
-        iterStart = this->pRecs[e_pId].begin();
+        iterBegin = this->pRecs[e_pId].begin();
         iterEnd = this->pRecs[e_pId].end();
-        for (RelationIterator iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 //            if ((max(Q.start, iter->start) >= this->pRecs[e_pId].gstart) && (iter->start <= Q.end && Q.start <= iter->end))
             if ((iter->start >= this->pRecs[e_pId].gstart) && (iter->start <= Q.end) && (Q.start <= iter->end))

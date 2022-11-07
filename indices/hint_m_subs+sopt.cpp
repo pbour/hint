@@ -326,11 +326,10 @@ HINT_M_SubsSopt::~HINT_M_SubsSopt()
 size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
 {
     size_t result = 0;
-    Relation::iterator iterStart;
-    RelationIterator iter, iterEnd;
-    RelationStart::iterator iterSStart, iterSEnd;
-    RelationEnd::iterator iterEStart, iterEEnd;
-    RelationIdIterator iterIStart, iterIEnd;
+    RelationIterator iter, iterBegin, iterEnd;
+    RelationStartIterator iterS, iterSBegin, iterSEnd;
+    RelationEndIterator iterE, iterEBegin, iterEEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end   >> (this->maxBits-this->numBits); // prefix
     Record qdummyE(0, Q.end+1, Q.end+1);
@@ -348,33 +347,33 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
             // all contents are guaranteed to be results
             
             // Handle the partition that contains a: consider both originals and replicas
-            iterEStart = this->pRepsIn[l][a].begin();
+            iterEBegin = this->pRepsIn[l][a].begin();
             iterEEnd = this->pRepsIn[l][a].end();
-            for (RelationEndIterator iter = iterEStart; iter != iterEEnd; iter++)
+            for (iterE = iterEBegin; iterE != iterEEnd; iterE++)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
 #else
-                result ^= iter->id;
+                result ^= iterE->id;
 #endif
             }
-            iterIStart =this->pRepsAft[l][a].begin();
+            iterIBegin =this->pRepsAft[l][a].begin();
             iterIEnd = this->pRepsAft[l][a].end();
-            for (RelationIdIterator iter = iterIStart; iter != iterIEnd; iter++)
+            for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
 #else
-                result ^= (*iter);
+                result ^= (*iterI);
 #endif
             }
             
             // Handle rest: consider only originals
             for (auto j = a; j <= b; j++)
             {
-                iterStart = this->pOrgsIn[l][j].begin();
+                iterBegin = this->pOrgsIn[l][j].begin();
                 iterEnd = this->pOrgsIn[l][j].end();
-                for (iter = iterStart; iter != iterEnd; iter++)
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
@@ -382,14 +381,14 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
                     result ^= iter->id;
 #endif
                 }
-                iterSStart = this->pOrgsAft[l][j].begin();
+                iterSBegin = this->pOrgsAft[l][j].begin();
                 iterSEnd = this->pOrgsAft[l][j].end();
-                for (RelationStartIterator iter = iterSStart; iter != iterSEnd; iter++)
+                for (iterS = iterSBegin; iterS != iterSEnd; iterS++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
 #else
-                    result ^= iter->id;
+                    result ^= iterS->id;
 #endif
                 }
             }
@@ -404,9 +403,9 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
                 // Special case when query overlaps only one partition, Lemma 3
                 if (!foundzero && !foundone)
                 {
-                    iterStart = this->pOrgsIn[l][a].begin();
+                    iterBegin = this->pOrgsIn[l][a].begin();
                     iterEnd = this->pOrgsIn[l][a].end();
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
                         if ((iter->start <= Q.end) && (Q.start <= iter->end))
                         {
@@ -417,25 +416,25 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
 #endif
                         }
                     }
-                    iterSStart = this->pOrgsAft[l][a].begin();
+                    iterSBegin = this->pOrgsAft[l][a].begin();
                     iterSEnd = this->pOrgsAft[l][a].end();
-                    for (RelationStartIterator iter = iterSStart; iter != iterSEnd; iter++)
+                    for (iterS = iterSBegin; iterS != iterSEnd; iterS++)
                     {
-                        if (iter->start <= Q.end)
+                        if (iterS->start <= Q.end)
                         {
 #ifdef WORKLOAD_COUNT
                             result++;
 #else
-                            result ^= iter->id;
+                            result ^= iterS->id;
 #endif
                         }
                     }
                 }
                 else if (foundzero)
                 {
-                    iterStart = this->pOrgsIn[l][a].begin();
+                    iterBegin = this->pOrgsIn[l][a].begin();
                     iterEnd = this->pOrgsIn[l][a].end();
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
                         if (iter->start <= Q.end)
                         {
@@ -446,25 +445,25 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
 #endif
                         }
                     }
-                    iterSStart = this->pOrgsAft[l][a].begin();
+                    iterSBegin = this->pOrgsAft[l][a].begin();
                     iterSEnd = this->pOrgsAft[l][a].end();
-                    for (RelationStartIterator iter = iterSStart; iter != iterSEnd; iter++)
+                    for (iterS = iterSBegin; iterS != iterSEnd; iterS++)
                     {
-                        if (iter->start <= Q.end)
+                        if (iterS->start <= Q.end)
                         {
 #ifdef WORKLOAD_COUNT
                             result++;
 #else
-                            result ^= iter->id;
+                            result ^= iterS->id;
 #endif
                         }
                     }
                 }
                 else if (foundone)
                 {
-                    iterStart = this->pOrgsIn[l][a].begin();
+                    iterBegin = this->pOrgsIn[l][a].begin();
                     iterEnd = this->pOrgsIn[l][a].end();
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
                         if (Q.start <= iter->end)
                         {
@@ -475,14 +474,14 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
 #endif
                         }
                     }
-                    iterSStart = this->pOrgsAft[l][a].begin();
+                    iterSBegin = this->pOrgsAft[l][a].begin();
                     iterSEnd = this->pOrgsAft[l][a].end();
-                    for (RelationStartIterator iter = iterSStart; iter != iterSEnd; iter++)
+                    for (iterS = iterSBegin; iterS != iterSEnd; iterS++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
 #else
-                        result ^= iter->id;
+                        result ^= iterS->id;
 #endif
                     }
                 }
@@ -492,9 +491,9 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
                 // Lemma 1
                 if (!foundzero)
                 {
-                    iterStart = this->pOrgsIn[l][a].begin();
+                    iterBegin = this->pOrgsIn[l][a].begin();
                     iterEnd = this->pOrgsIn[l][a].end();
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
                         if (Q.start <= iter->end)
                         {
@@ -508,9 +507,9 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
                 }
                 else
                 {
-                    iterStart = this->pOrgsIn[l][a].begin();
+                    iterBegin = this->pOrgsIn[l][a].begin();
                     iterEnd = this->pOrgsIn[l][a].end();
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
@@ -519,14 +518,14 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
 #endif
                     }
                 }
-                iterSStart = this->pOrgsAft[l][a].begin();
+                iterSBegin = this->pOrgsAft[l][a].begin();
                 iterSEnd = this->pOrgsAft[l][a].end();
-                for (RelationStartIterator iter = iterSStart; iter != iterSEnd; iter++)
+                for (iterS = iterSBegin; iterS != iterSEnd; iterS++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
 #else
-                    result ^= iter->id;
+                    result ^= iterS->id;
 #endif
                 }
             }
@@ -534,41 +533,41 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
             // Lemma 1, 3
             if (!foundzero)
             {
-                iterEStart = this->pRepsIn[l][a].begin();
+                iterEBegin = this->pRepsIn[l][a].begin();
                 iterEEnd = this->pRepsIn[l][a].end();
-                for (RelationEndIterator iter = iterEStart; iter != iterEEnd; iter++)
+                for (iterE = iterEBegin; iterE != iterEEnd; iterE++)
                 {
-                    if (Q.start <= iter->end)
+                    if (Q.start <= iterE->end)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
 #else
-                        result ^= iter->id;
+                        result ^= iterE->id;
 #endif
                     }
                 }
             }
             else
             {
-                iterEStart = this->pRepsIn[l][a].begin();
+                iterEBegin = this->pRepsIn[l][a].begin();
                 iterEEnd = this->pRepsIn[l][a].end();
-                for (RelationEndIterator iter = iterEStart; iter != iterEEnd; iter++)
+                for (iterE = iterEBegin; iterE != iterEEnd; iterE++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
 #else
-                    result ^= iter->id;
+                    result ^= iterE->id;
 #endif
                 }
             }
-            iterIStart = this->pRepsAft[l][a].begin();
+            iterIBegin = this->pRepsAft[l][a].begin();
             iterIEnd = this->pRepsAft[l][a].end();
-            for (RelationIdIterator iter = iterIStart; iter != iterIEnd; iter++)
+            for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
 #else
-                result ^= (*iter);
+                result ^= (*iterI);
 #endif
             }
             
@@ -579,9 +578,9 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
                     // Handle the rest before the partition that contains b: consider only originals, no comparisons needed
                     for (auto j = a+1; j < b; j++)
                     {
-                        iterStart = this->pOrgsIn[l][j].begin();
+                        iterBegin = this->pOrgsIn[l][j].begin();
                         iterEnd = this->pOrgsIn[l][j].end();
-                        for (iter = iterStart; iter != iterEnd; iter++)
+                        for (iter = iterBegin; iter != iterEnd; iter++)
                         {
 #ifdef WORKLOAD_COUNT
                             result++;
@@ -589,22 +588,22 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
                             result ^= iter->id;
 #endif
                         }
-                        iterSStart = this->pOrgsAft[l][j].begin();
+                        iterSBegin = this->pOrgsAft[l][j].begin();
                         iterSEnd = this->pOrgsAft[l][j].end();
-                        for (RelationStartIterator iter = iterSStart; iter != iterSEnd; iter++)
+                        for (iterS = iterSBegin; iterS != iterSEnd; iterS++)
                         {
 #ifdef WORKLOAD_COUNT
                             result++;
 #else
-                            result ^= iter->id;
+                            result ^= iterS->id;
 #endif
                         }
                     }
                     
                     // Handle the partition that contains b: consider only originals, comparisons needed
-                    iterStart = this->pOrgsIn[l][b].begin();
+                    iterBegin = this->pOrgsIn[l][b].begin();
                     iterEnd = this->pOrgsIn[l][b].end();
-                    for (iter = iterStart; iter != iterEnd; iter++)
+                    for (iter = iterBegin; iter != iterEnd; iter++)
                     {
                         if (iter->start <= Q.end)
                         {
@@ -615,16 +614,16 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
 #endif
                         }
                     }
-                    iterSStart = this->pOrgsAft[l][b].begin();
+                    iterSBegin = this->pOrgsAft[l][b].begin();
                     iterSEnd = this->pOrgsAft[l][b].end();
-                    for (RelationStartIterator iter = iterSStart; iter != iterSEnd; iter++)
+                    for (iterS = iterSBegin; iterS != iterSEnd; iterS++)
                     {
-                        if (iter->start <= Q.end)
+                        if (iterS->start <= Q.end)
                         {
 #ifdef WORKLOAD_COUNT
                             result++;
 #else
-                            result ^= iter->id;
+                            result ^= iterS->id;
 #endif
                         }
                     }
@@ -633,9 +632,9 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
                 {
                     for (auto j = a+1; j <= b; j++)
                     {
-                        iterStart = this->pOrgsIn[l][j].begin();
+                        iterBegin = this->pOrgsIn[l][j].begin();
                         iterEnd = this->pOrgsIn[l][j].end();
-                        for (iter = iterStart; iter != iterEnd; iter++)
+                        for (iter = iterBegin; iter != iterEnd; iter++)
                         {
 #ifdef WORKLOAD_COUNT
                             result++;
@@ -643,14 +642,14 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
                             result ^= iter->id;
 #endif
                         }
-                        iterSStart = this->pOrgsAft[l][j].begin();
+                        iterSBegin = this->pOrgsAft[l][j].begin();
                         iterSEnd = this->pOrgsAft[l][j].end();
-                        for (RelationStartIterator iter = iterSStart; iter != iterSEnd; iter++)
+                        for (iterS = iterSBegin; iterS != iterSEnd; iterS++)
                         {
 #ifdef WORKLOAD_COUNT
                             result++;
 #else
-                            result ^= iter->id;
+                            result ^= iterS->id;
 #endif
                         }
                     }
@@ -670,9 +669,9 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
     if (foundone && foundzero)
     {
         // All contents are guaranteed to be results
-        iterStart = this->pOrgsIn[this->numBits][0].begin();
+        iterBegin = this->pOrgsIn[this->numBits][0].begin();
         iterEnd = this->pOrgsIn[this->numBits][0].end();
-        for (iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
@@ -684,9 +683,9 @@ size_t HINT_M_SubsSopt::executeBottomUp_gOverlaps(RangeQuery Q)
     else
     {
         // Comparisons needed
-        iterStart = this->pOrgsIn[this->numBits][0].begin();
+        iterBegin = this->pOrgsIn[this->numBits][0].begin();
         iterEnd = this->pOrgsIn[this->numBits][0].end();
-        for (RelationIterator iter = iterStart; iter != iterEnd; iter++)
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if ((iter->start <= Q.end) && (Q.start <= iter->end))
             {

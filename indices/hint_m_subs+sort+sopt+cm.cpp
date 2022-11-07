@@ -368,10 +368,10 @@ HINT_M_SubsSortSopt_CM::~HINT_M_SubsSortSopt_CM()
 size_t HINT_M_SubsSortSopt_CM::executeBottomUp_gOverlaps(RangeQuery Q)
 {
     size_t result = 0;
-    vector<pair<Timestamp, Timestamp> >::iterator iter, iterStart, iterEnd;
-    vector<Timestamp>::iterator iterSStart, iterSEnd;
-    vector<Timestamp>::iterator iterEStart, iterEEnd;
-    RelationIdIterator iterIStart, iterIEnd;
+    vector<pair<Timestamp, Timestamp> >::iterator iter, iterBegin, iterEnd;
+    vector<Timestamp>::iterator iterS, iterSBegin, iterSEnd;
+    vector<Timestamp>::iterator iterE, iterEBegin, iterEEnd;
+    RelationIdIterator iterI, iterIBegin, iterIEnd;
     Timestamp a = Q.start >> (this->maxBits-this->numBits); // prefix
     Timestamp b = Q.end   >> (this->maxBits-this->numBits); // prefix
     pair<Timestamp, Timestamp> qdummyE(Q.end+1, Q.end+1);
@@ -389,48 +389,48 @@ size_t HINT_M_SubsSortSopt_CM::executeBottomUp_gOverlaps(RangeQuery Q)
             // all contents are guaranteed to be results
             
             // Handle the partition that contains a: consider both originals and replicas
-            iterIStart = this->pRepsInIds[l][a].begin();
+            iterIBegin = this->pRepsInIds[l][a].begin();
             iterIEnd = this->pRepsInIds[l][a].end();
-            for (RelationIdIterator iter = iterIStart; iter != iterIEnd; iter++)
+            for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
 #else
-                result ^= (*iter);
+                result ^= (*iterI);
 #endif
             }
-            iterIStart =this->pRepsAft[l][a].begin();
+            iterIBegin =this->pRepsAft[l][a].begin();
             iterIEnd = this->pRepsAft[l][a].end();
-            for (RelationIdIterator iter = iterIStart; iter != iterIEnd; iter++)
+            for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
 #else
-                result ^= (*iter);
+                result ^= (*iterI);
 #endif
             }
             
             // Handle rest: consider only originals
             for (auto j = a; j <= b; j++)
             {
-                iterIStart = this->pOrgsInIds[l][j].begin();
+                iterIBegin = this->pOrgsInIds[l][j].begin();
                 iterIEnd = this->pOrgsInIds[l][j].end();
-                for (RelationIdIterator iter = iterIStart; iter != iterIEnd; iter++)
+                for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
 #else
-                    result ^= (*iter);
+                    result ^= (*iterI);
 #endif
                 }
-                iterIStart = this->pOrgsAftIds[l][j].begin();
+                iterIBegin = this->pOrgsAftIds[l][j].begin();
                 iterIEnd = this->pOrgsAftIds[l][j].end();
-                for (RelationIdIterator iter = iterIStart; iter != iterIEnd; iter++)
+                for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
 #else
-                    result ^= (*iter);
+                    result ^= (*iterI);
 #endif
                 }
             }
@@ -443,78 +443,78 @@ size_t HINT_M_SubsSortSopt_CM::executeBottomUp_gOverlaps(RangeQuery Q)
             if (a == b)
             {
                 // Special case when query overlaps only one partition, Lemma 3
-                iterStart = this->pOrgsInTimestamps[l][a].begin();
-                iterEnd = lower_bound(iterStart, this->pOrgsInTimestamps[l][a].end(), qdummyE, CompareTimestampPairsByStart);
-                for (iter = iterStart; iter != iterEnd; iter++)
+                iterBegin = this->pOrgsInTimestamps[l][a].begin();
+                iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[l][a].end(), qdummyE, CompareTimestampPairsByStart);
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
                     if (Q.start <= iter->second)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
 #else
-                        result ^= this->pOrgsInIds[l][a][iter-iterStart];
+                        result ^= this->pOrgsInIds[l][a][iter-iterBegin];
 #endif
                     }
                 }
-                iterSStart = this->pOrgsAftTimestamp[l][a].begin();
-                iterSEnd = lower_bound(iterSStart, this->pOrgsAftTimestamp[l][a].end(), qdummySE);
-                for (vector<Timestamp>::iterator iter = iterSStart; iter != iterSEnd; iter++)
+                iterSBegin = this->pOrgsAftTimestamp[l][a].begin();
+                iterSEnd = lower_bound(iterSBegin, this->pOrgsAftTimestamp[l][a].end(), qdummySE);
+                for (iterS = iterSBegin; iterS != iterSEnd; iterS++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
 #else
-                    result ^= this->pOrgsAftIds[l][a][iter-iterSStart];
+                    result ^= this->pOrgsAftIds[l][a][iterS-iterSBegin];
 #endif
                 }
             }
             else
             {
                 // Lemma 1
-                iterStart = this->pOrgsInTimestamps[l][a].begin();
+                iterBegin = this->pOrgsInTimestamps[l][a].begin();
                 iterEnd = this->pOrgsInTimestamps[l][a].end();
-                for (iter = iterStart; iter != iterEnd; iter++)
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
                     if (Q.start <= iter->second)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
 #else
-                        result ^= this->pOrgsInIds[l][a][iter-iterStart];
+                        result ^= this->pOrgsInIds[l][a][iter-iterBegin];
 #endif
                     }
                 }
-                iterSStart = this->pOrgsAftTimestamp[l][a].begin();
+                iterSBegin = this->pOrgsAftTimestamp[l][a].begin();
                 iterSEnd = this->pOrgsAftTimestamp[l][a].end();
-                for (vector<Timestamp>::iterator iter = iterSStart; iter != iterSEnd; iter++)
+                for (vector<Timestamp>::iterator iter = iterSBegin; iter != iterSEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
 #else
-                    result ^= this->pOrgsAftIds[l][a][iter-iterSStart];
+                    result ^= this->pOrgsAftIds[l][a][iter-iterSBegin];
 #endif
                 }
             }
             
             // Lemma 1, 3
-            iterEStart = this->pRepsInTimestamp[l][a].begin();
+            iterEBegin = this->pRepsInTimestamp[l][a].begin();
             iterEEnd = this->pRepsInTimestamp[l][a].end();
-            vector<Timestamp>::iterator pivot = lower_bound(iterEStart, iterEEnd, qdummyS);
-            for (vector<Timestamp>::iterator iter = pivot; iter != iterEEnd; iter++)
+            vector<Timestamp>::iterator pivot = lower_bound(iterEBegin, iterEEnd, qdummyS);
+            for (iterE = pivot; iterE != iterEEnd; iterE++)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
 #else
-                result ^= this->pRepsInIds[l][a][iter-iterEStart];
+                result ^= this->pRepsInIds[l][a][iterE-iterEBegin];
 #endif
             }
-            iterIStart = this->pRepsAft[l][a].begin();
+            iterIBegin = this->pRepsAft[l][a].begin();
             iterIEnd = this->pRepsAft[l][a].end();
-            for (RelationIdIterator iter = iterIStart; iter != iterIEnd; iter++)
+            for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
 #else
-                result ^= (*iter);
+                result ^= (*iterI);
 #endif
             }
             
@@ -523,47 +523,47 @@ size_t HINT_M_SubsSortSopt_CM::executeBottomUp_gOverlaps(RangeQuery Q)
                 // Handle the rest before the partition that contains b: consider only originals, no comparisons needed
                 for (auto j = a+1; j < b; j++)
                 {
-                    iterIStart = this->pOrgsInIds[l][j].begin();
+                    iterIBegin = this->pOrgsInIds[l][j].begin();
                     iterIEnd = this->pOrgsInIds[l][j].end();
-                    for (RelationIdIterator iter = iterIStart; iter != iterIEnd; iter++)
+                    for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
 #else
-                        result ^= (*iter);
+                        result ^= (*iterI);
 #endif
                     }
-                    iterIStart = this->pOrgsAftIds[l][j].begin();
+                    iterIBegin = this->pOrgsAftIds[l][j].begin();
                     iterIEnd = this->pOrgsAftIds[l][j].end();
-                    for (RelationIdIterator iter = iterIStart; iter != iterIEnd; iter++)
+                    for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
                     {
 #ifdef WORKLOAD_COUNT
                         result++;
 #else
-                        result ^= (*iter);
+                        result ^= (*iterI);
 #endif
                     }
                 }
                 
                 // Handle the partition that contains b: consider only originals, comparisons needed
-                iterStart = this->pOrgsInTimestamps[l][b].begin();
-                iterEnd = lower_bound(iterStart, this->pOrgsInTimestamps[l][b].end(), qdummyE, CompareTimestampPairsByStart);
-                for (iter = iterStart; iter != iterEnd; iter++)
+                iterBegin = this->pOrgsInTimestamps[l][b].begin();
+                iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[l][b].end(), qdummyE, CompareTimestampPairsByStart);
+                for (iter = iterBegin; iter != iterEnd; iter++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
 #else
-                    result ^= this->pOrgsInIds[l][b][iter-iterStart];
+                    result ^= this->pOrgsInIds[l][b][iter-iterBegin];
 #endif
                 }
-                iterSStart = this->pOrgsAftTimestamp[l][b].begin();
-                iterSEnd = lower_bound(iterSStart, this->pOrgsAftTimestamp[l][b].end(), qdummySE);
-                for (vector<Timestamp>::iterator iter = iterSStart; iter != iterSEnd; iter++)
+                iterSBegin = this->pOrgsAftTimestamp[l][b].begin();
+                iterSEnd = lower_bound(iterSBegin, this->pOrgsAftTimestamp[l][b].end(), qdummySE);
+                for (iterS = iterSBegin; iterS != iterSEnd; iterS++)
                 {
 #ifdef WORKLOAD_COUNT
                     result++;
 #else
-                    result ^= this->pOrgsAftIds[l][b][iter-iterSStart];
+                    result ^= this->pOrgsAftIds[l][b][iterS-iterSBegin];
 #endif
                 }
             }
@@ -581,30 +581,30 @@ size_t HINT_M_SubsSortSopt_CM::executeBottomUp_gOverlaps(RangeQuery Q)
     if (foundone && foundzero)
     {
         // All contents are guaranteed to be results
-        iterIStart = this->pOrgsInIds[this->numBits][0].begin();
+        iterIBegin = this->pOrgsInIds[this->numBits][0].begin();
         iterIEnd = this->pOrgsInIds[this->numBits][0].end();
-        for (RelationIdIterator iter = iterIStart; iter != iterIEnd; iter++)
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
         {
 #ifdef WORKLOAD_COUNT
             result++;
 #else
-            result ^= (*iter);
+            result ^= (*iterI);
 #endif
         }
     }
     else
     {
         // Comparisons needed
-        iterStart = this->pOrgsInTimestamps[this->numBits][0].begin();
-        iterEnd = lower_bound(iterStart, this->pOrgsInTimestamps[this->numBits][0].end(), qdummyE, CompareTimestampPairsByStart);
-        for (iter = iterStart; iter != iterEnd; iter++)
+        iterBegin = this->pOrgsInTimestamps[this->numBits][0].begin();
+        iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits][0].end(), qdummyE, CompareTimestampPairsByStart);
+        for (iter = iterBegin; iter != iterEnd; iter++)
         {
             if (Q.start <= iter->second)
             {
 #ifdef WORKLOAD_COUNT
                 result++;
 #else
-                result ^= this->pOrgsInIds[this->numBits][0][iter-iterStart];
+                result ^= this->pOrgsInIds[this->numBits][0][iter-iterBegin];
 #endif
             }
         }
