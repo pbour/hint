@@ -31,6 +31,7 @@
 
 #include "../def_global.h"
 #include "../containers/relation.h"
+#include "../containers/offsets_templates.cpp"
 #include "../indices/hierarchicalindex.h"
 
 
@@ -70,7 +71,7 @@ private:
     size_t     **pReps_sizes;
     RecordId   **pOrgs_offsets;
     size_t     **pReps_offsets;
-    vector<tuple<Timestamp, RelationIdIterator, PartitionId> > *pOrgs_ioffsets, *pReps_ioffsets;
+    Offsets_SS_HINT *pOrgs_ioffsets, *pReps_ioffsets;
     
     // Construction
     inline void updateCounters(const Record &r);
