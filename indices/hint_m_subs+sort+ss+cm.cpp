@@ -2524,7 +2524,7 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Meets(RangeQuery Q)
         iterI = this->pOrgsInIds[this->numBits].begin();
         iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterBegin, iterEnd, make_pair<Timestamp, Timestamp>(Q.end+0, Q.end+0), CompareTimestampPairsByStart);
+        iter = lower_bound(iterBegin, iterEnd, qdummyE, CompareTimestampPairsByStart);
         iterI += iter-iterBegin;
         while ((iter != iterEnd) && (Q.end == iter->first))
         {
@@ -2575,7 +2575,7 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Met(RangeQuery Q)
 
     // Handle root.
 //    if (!(foundone && foundzero))
-    if (foundzero)
+    if (!foundzero)
     {
         // Comparisons needed
         iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
@@ -2665,27 +2665,42 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Overlaps(RangeQuery Q)
     }
 
     // Handle root.
-//    if (foundone && foundzero)
-//    {
-//        // All contents are guaranteed to be results
-//        iterIBegin = this->pOrgsInIds[this->numBits].begin();
-//        iterIEnd = this->pOrgsInIds[this->numBits].end();
-//        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
-//            result ^= (*iterI);
-//    }
-//    else
-//    {
-//        // Comparisons needed
-//        iterI = this->pOrgsInIds[this->numBits].begin();
-//        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
-//        iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampPairsByStart);
-//        for (iter = iterBegin; iter != iterEnd; iter++)
-//        {
-//            if (Q.start <= iter->second)
-//                result ^= (*iterI);
-//            iterI++;
-//        }
-//    }
+    if (foundone && foundzero)
+    {
+        // All contents are guaranteed to be results
+        iterIBegin = this->pOrgsInIds[this->numBits].begin();
+        iterIEnd = this->pOrgsInIds[this->numBits].end();
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
+        {
+#ifdef WORKLOAD_COUNT
+            result++;
+#else
+            result ^= (*iterI);
+#endif
+        }
+    }
+    else
+    {
+        // Comparisons needed
+        iterI = this->pOrgsInIds[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
+        iterEnd = this->pOrgsInTimestamps[this->numBits].end();
+        iter = lower_bound(iterBegin, iterEnd, make_pair(Q.start+1, Q.start+1), CompareTimestampPairsByStart);
+        iterI += iter-iterBegin;
+        while ((iter != iterEnd) && (Q.end > iter->first))
+        {
+            if (Q.end < iter->second)
+            {
+#ifdef WORKLOAD_COUNT
+                result++;
+#else
+                result ^= (*iterI);
+#endif
+            }
+            iter++;
+            iterI++;
+        }
+    }
 
 
     return result;
@@ -2767,27 +2782,40 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Overlapped(RangeQuery Q)
 
 
     // Handle root.
-//    if (foundone && foundzero)
-//    {
-//        // All contents are guaranteed to be results
-//        iterIBegin = this->pOrgsInIds[this->numBits].begin();
-//        iterIEnd = this->pOrgsInIds[this->numBits].end();
-//        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
-//            result ^= (*iterI);
-//    }
-//    else
-//    {
-//        // Comparisons needed
-//        iterI = this->pOrgsInIds[this->numBits].begin();
-//        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
-//        iterEnd = lower_bound(iterBegin, this->pOrgsInTimestamps[this->numBits].end(), make_pair<Timestamp, Timestamp>(Q.end+1, Q.end+1), CompareTimestampPairsByStart);
-//        for (iter = iterBegin; iter != iterEnd; iter++)
-//        {
-//            if (Q.start <= iter->second)
-//                result ^= (*iterI);
-//            iterI++;
-//        }
-//    }
+    if (foundone && foundzero)
+    {
+        // All contents are guaranteed to be results
+        iterIBegin = this->pOrgsInIds[this->numBits].begin();
+        iterIEnd = this->pOrgsInIds[this->numBits].end();
+        for (iterI = iterIBegin; iterI != iterIEnd; iterI++)
+        {
+#ifdef WORKLOAD_COUNT
+            result++;
+#else
+            result ^= (*iterI);
+#endif
+        }
+    }
+    else
+    {
+        // Comparisons needed
+        iterI = this->pOrgsInIds[this->numBits].begin();
+        iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
+        iterEnd = this->pOrgsInTimestamps[this->numBits].end();
+        vector<pair< Timestamp, Timestamp> >::iterator pivot = lower_bound(iterBegin, iterEnd, make_pair(Q.start, Q.start), CompareTimestampPairsByStart);
+        for (iter = iterBegin; iter != pivot; iter++)
+        {
+            if ((Q.start < iter->second) && (Q.end > iter->second))
+            {
+#ifdef WORKLOAD_COUNT
+                result++;
+#else
+                result ^= (*iterI);
+#endif
+            }
+            iterI++;
+        }
+    }
 
 
     return result;
@@ -2853,7 +2881,7 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Contains(RangeQuery Q)
         iterI = this->pOrgsInIds[this->numBits].begin();
         iterBegin = this->pOrgsInTimestamps[this->numBits].begin();
         iterEnd = this->pOrgsInTimestamps[this->numBits].end();
-        iter = lower_bound(iterBegin, iterEnd, make_pair(Q.start+1, Q.start+1));
+        iter = lower_bound(iterBegin, iterEnd, make_pair(Q.start+1, Q.start+1), CompareTimestampPairsByStart);
         iterI += iter-iterBegin;
         while (iter != iterEnd)
         {
@@ -3067,9 +3095,8 @@ size_t HINT_M_SubsSort_SS_CM::executeBottomUp_Preceded(RangeQuery Q)
 #else
                 result ^= (*iterI);
 #endif
-
-                iterI++;
             }
+            iterI++;
         }
     }
     else

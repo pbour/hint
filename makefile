@@ -1,6 +1,13 @@
-CC      = g++
-CFLAGS  = -O3 -mavx -std=c++14 -w
-LDFLAGS =
+OS := $(shell uname)
+ifeq ($(OS),Darwin)
+	CC	= /opt/homebrew/bin/g++-12
+	CFLAGS  = -O3 -std=c++14 -w -march=native -I/opt/homebrew/Cellar/boost/1.79.0_2/include
+   	LDFLAGS =
+else
+	CC      = g++
+	CFLAGS  = -O3 -mavx -std=c++14 -w
+	LDFLAGS =
+endif
 
 SOURCES = utils.cpp containers/relation.cpp containers/offsets_templates.cpp containers/offsets.cpp indices/1dgrid.cpp indices/hierarchicalindex.cpp indices/hint.cpp indices/hint_m.cpp indices/hint_m_subs+sort.cpp indices/hint_m_subs+sopt.cpp indices/hint_m_subs+sort+sopt.cpp indices/hint_m_subs+sort+sopt+ss.cpp indices/hint_m_subs+sort+sopt+cm.cpp indices/hint_m_subs+sort+ss+cm.cpp indices/hint_m_all.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
