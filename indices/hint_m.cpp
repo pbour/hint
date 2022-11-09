@@ -220,10 +220,11 @@ void HINT_M::getStats()
         auto cnt = pow(2, this->numBits-l);
 
         this->numPartitions += cnt;
-        for (int j = 0; j < cnt; j++)
+        for (int p = 0; p < cnt; p++)
         {
-            this->numReplicas += this->pReps[l][j].size();
-            if ((this->pOrgs[l][j].empty()) && (this->pReps[l][j].empty()))
+            this->numOriginals += this->pOrgs[l][p].size();
+            this->numReplicas += this->pReps[l][p].size();
+            if ((this->pOrgs[l][p].empty()) && (this->pReps[l][p].empty()))
                 this->numEmptyPartitions++;
         }
     }
