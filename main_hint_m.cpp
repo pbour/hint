@@ -357,10 +357,18 @@ int main(int argc, char **argv)
     cout << "Optimizations             : " << ((settings.typeOptimizations == HINT_M_OPTIMIZATIONS_NO)? "no": strOptimizations) << endl;
     cout << "Num of bits               : " << settings.numBits << endl;
     cout << "Num of partitions         : " << idxR->numPartitions << endl;
-    cout << "Num of Originals (In)     : " << idxR->numOriginalsIn << endl;
-    cout << "Num of Originals (Aft)    : " << idxR->numOriginalsAft << endl;
-    cout << "Num of replicas (In)      : " << idxR->numReplicasIn << endl;
-    cout << "Num of replicas (Aft)     : " << idxR->numReplicasAft << endl;
+    if (settings.typeOptimizations == HINT_M_OPTIMIZATIONS_NO)
+    {
+        cout << "Num of Originals          : " << idxR->numOriginals << endl;
+        cout << "Num of replicas           : " << idxR->numReplicas << endl;
+    }
+    else
+    {
+        cout << "Num of Originals (In)     : " << idxR->numOriginalsIn << endl;
+        cout << "Num of Originals (Aft)    : " << idxR->numOriginalsAft << endl;
+        cout << "Num of replicas (In)      : " << idxR->numReplicasIn << endl;
+        cout << "Num of replicas (Aft)     : " << idxR->numReplicasAft << endl;
+    }
     cout << "Num of empty partitions   : " << idxR->numEmptyPartitions << endl;
     printf( "Avg partition size        : %f\n", idxR->avgPartitionSize);
     printf( "Read VM [Bytes]           : %ld\n", (size_t)(vmI-vmDQ)*1024);
