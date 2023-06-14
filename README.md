@@ -1,7 +1,7 @@
 # HINT: A Hierarchical Index for Intervals in Main Memory
 
 Source code from the following publications:
-- George Christodoulou, Panagiotis Bouros and Nikos Mamoulis, <i>HINT: A Hierarchical Interval Index for Allen Relationships</i>, https://pbour.github.io/docs/vldbj23.pdf, to appear at the VLDB Journal
+- George Christodoulou, Panagiotis Bouros and Nikos Mamoulis, <i>HINT: A Hierarchical Interval Index for Allen Relationships</i>, https://doi.org/10.1007/s00778-023-00798-w, to appear at the VLDB Journal (online first)
 - George Christodoulou, Panagiotis Bouros and Nikos Mamoulis, <i>HINT: A Hierarchical Index for Intervals in Main Memory</i>, https://doi.org/10.1145/3514221.3517873, ACM SIGMOD Conference, pp. 1257-1270 (2022)
 
 ## Dependencies
