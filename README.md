@@ -171,7 +171,7 @@ You can switch between the two by appropriately setting the `WORKLOAD_COUNT` fla
     ```
     ###### subs+sort+ss+cm optimizations  (only bottom-up)
     ```sh
-    $ ./query_hint_m.exec -m 10 -o subs+sort+sopt+cm -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
+    $ ./query_hint_m.exec -m 10 -o subs+sort+ss+cm -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### all optimizations  (only bottom-up)
     ```sh
