@@ -3,7 +3,7 @@
  * Purpose:  Indexing interval data
  * Author:   Panagiotis Bouros, pbour@github.io
  ******************************************************************************
- * Copyright (c) 2020 - 2022
+ * Copyright (c) 2020 - 2023
  *
  * All rights reserved.
  *
@@ -142,11 +142,6 @@ int main(int argc, char **argv)
         usage();
         return 1;
     }
-    if (settings.numBits <= 0)
-    {
-        cerr << endl << "Error - invalid number of bits \"" << settings.numBits << "\"" << endl << endl;
-        return 1;
-    }
     settings.dataFile = argv[optind];
     settings.queryFile = argv[optind+1];
     
@@ -165,6 +160,9 @@ int main(int argc, char **argv)
 
     
     // Build index
+    if (settings.numBits == 0)
+        settings.numBits = determineOptimalNumBitsForHINT_M(R, 0.1);    // Use 0.1% of the domain as the query extent
+
     switch (settings.typeOptimizations)
     {
         // Base HINT^m, no optimizations activated
