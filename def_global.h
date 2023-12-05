@@ -92,21 +92,20 @@ struct RunSettings
 	const char   *dataFile;
 	const char   *queryFile;
 	bool         verbose;
-    unsigned int typeQuery;
-    unsigned int typePredicate;
+    	unsigned int typeQuery;
+    	unsigned int typePredicate;
 	unsigned int numPartitions;
 	unsigned int numBits;
 	unsigned int maxBits;
 	bool         topDown;
-	bool         isAutoTuned;
 	unsigned int numRuns;
-    unsigned int typeOptimizations;
+    	unsigned int typeOptimizations;
 	
 	void init()
 	{
 		verbose	          = false;
 		topDown           = false;
-		isAutoTuned       = false;
+        	numBits           = 0;
 		numRuns           = 1;
         typeOptimizations = 0;
 	};
@@ -178,10 +177,12 @@ public:
 	}
 };
 
+class Relation;
 
 // Imports from utils
 string toUpperCase(char *buf);
 bool checkPredicate(string strPredicate, RunSettings &settings);
 bool checkOptimizations(string strOptimizations, RunSettings &settings);
 void process_mem_usage(double& vm_usage, double& resident_set);
+unsigned int determineOptimalNumBitsForHINT_M(const Relation &R, const float qe_precentage);
 #endif // _GLOBAL_DEF_H_
