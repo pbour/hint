@@ -181,6 +181,5 @@ You can switch between the two by appropriately setting the `WORKLOAD_COUNT` fla
 
 ## Notes / TODOs
 The following are missing from the current version of the code:
-- Model for automatically setting parameter "m" on HINT<sup>m</sup>
 - HINT with SS optimization answering the basic predicates from Allen's algebra
 - Updates 
