@@ -131,6 +131,7 @@ You can switch between the two by appropriately setting the `WORKLOAD_COUNT` fla
 - indices/hint_m_subs+sopt.cpp
 - indices/hint_m_subs+sort+sopt.cpp
 - indices/hint_m_subs+sort+sopt+ss.cpp
+- indices/hint_m_subs+sort+cm.cpp
 - indices/hint_m_subs+sort+sopt+cm.cpp
 - indices/hint_m_subs+sort+ss+cm.cpp
 - indices/hint_m_all.cpp
@@ -139,7 +140,7 @@ You can switch between the two by appropriately setting the `WORKLOAD_COUNT` fla
 | Extra parameter | Description | Comment |
 | ------ | ------ | ------ |
 | -m |  set the number of bits; if not set, a value will be automattically determined using the cost model | 10 for BOOKS in the experiments |
-| -o |  set optimizations to be used: "SUBS+SORT" or "SUBS+SOPT" or "SUBS+SORT+SOPT" or "SUBS+SORT+SOPT+SS" or "SUBS+SORT+SOPT+CM" or "SUBS+SORT+SS+CM" or "ALL"| omit parameter for base HINT<sup>m</sup>; "CM" for cache misses optimization |
+| -o |  set optimizations to be used: "SUBS+SORT" or "SUBS+SOPT" or "SUBS+SORT+SOPT" or "SUBS+SORT+SOPT+SS" or "SUBS+SORT+CM" or "SUBS+SORT+SOPT+CM" or "SUBS+SORT+SS+CM" or "ALL"| omit parameter for base HINT<sup>m</sup>; "CM" for cache misses optimization |
 | -t |  evaluate query traversing the hierarchy in a top-down fashion; by default the bottom-up strategy is used | currently supported only by base HINT<sup>m</sup> |
 
 - ##### Examples
@@ -167,6 +168,10 @@ You can switch between the two by appropriately setting the `WORKLOAD_COUNT` fla
     ###### subs+sort+sopt+ss (only bottom-up)
     ```sh
     $ ./query_hint_m.exec -m 10 -o subs+sort+sopt+ss -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
+    ```
+    ###### subs+sort+cm (only bottom-up)
+    ```sh
+    $ ./query_hint_m.exec -m 10 -o subs+sort+cm -q gOVERLAPS -r 10 samples/AARHUS-BOOKS_2013.dat samples/AARHUS-BOOKS_2013_20k.qry
     ```
     ###### subs+sort+sopt+cm (only bottom-up)
     ```sh

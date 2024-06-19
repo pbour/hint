@@ -3,7 +3,7 @@
  * Purpose:  Indexing interval data
  * Author:   Panagiotis Bouros, pbour@github.io
  ******************************************************************************
- * Copyright (c) 2020 - 2023
+ * Copyright (c) 2020 - 2024
  *
  * All rights reserved.
  *
@@ -50,7 +50,7 @@ void usage()
     cerr << "       -m bits" << endl;
     cerr << "              set the number of bits" << endl;
     cerr << "       -o optimizations" << endl;
-    cerr << "              set optimizations to be used: \"subs+sort\" or \"subs+sopt\" or \"subs+sort+sopt\" or \"subs+sort+sopt+ss\" or \"subs+sort+sopt+cm\" or \"subs+sort+ss+cm\" or \"all\"; omit option for base HINT^m" << endl;
+    cerr << "              set optimizations to be used: \"subs+sort\" or \"subs+sopt\" or \"subs+sort+sopt\" or \"subs+sort+sopt+ss\" or \"subs+sort+cm\" or \"subs+sort+sopt+cm\" or \"subs+sort+ss+cm\" or \"all\"; omit option for base HINT^m" << endl;
     cerr << "       -t" << endl;
     cerr << "              evaluate query traversing the hierarchy in a top-down fashion, currently supported only by base HINT^m; by default the bottom-up strategy is used" << endl;
     cerr << "       -r runs" << endl;
@@ -186,7 +186,7 @@ int main(int argc, char **argv)
             totalIndexTime = tim.stop();
             break;
 
-        // HINT^m with subs+sort+sopt optimization activated
+            // HINT^m with subs+sort+sopt optimization activated
         case HINT_M_OPTIMIZATIONS_SUBS_SORT_SOPT:
             tim.start();
             idxR = new HINT_M_SubsSortSopt(R, settings.numBits, settings.maxBits);
@@ -197,6 +197,13 @@ int main(int argc, char **argv)
         case HINT_M_OPTIMIZATIONS_SUBS_SORT_SOPT_SS:
             tim.start();
             idxR = new HINT_M_SubsSortSopt_SS(R, settings.numBits, settings.maxBits);
+            totalIndexTime = tim.stop();
+            break;
+
+        // HINT^m with subs+sopt optimization activated
+        case HINT_M_OPTIMIZATIONS_SUBS_SORT_CM:
+            tim.start();
+            idxR = new HINT_M_SubsSort_CM(R, settings.numBits, settings.maxBits);
             totalIndexTime = tim.stop();
             break;
 

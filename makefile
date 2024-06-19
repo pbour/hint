@@ -1,8 +1,8 @@
 CC      = g++
-CFLAGS  = -O3 -std=c++14 -w -march=native
+CFLAGS  = -O3 -mavx -std=c++14 -w
 LDFLAGS =
 
-SOURCES = utils.cpp containers/relation.cpp containers/offsets_templates.cpp containers/offsets.cpp indices/1dgrid.cpp indices/hierarchicalindex.cpp indices/hint.cpp indices/hint_m.cpp indices/hint_m_subs+sort.cpp indices/hint_m_subs+sopt.cpp indices/hint_m_subs+sort+sopt.cpp indices/hint_m_subs+sort+sopt+ss.cpp indices/hint_m_subs+sort+sopt+cm.cpp indices/hint_m_subs+sort+ss+cm.cpp indices/hint_m_all.cpp
+SOURCES = utils.cpp containers/relation.cpp containers/offsets_templates.cpp containers/offsets.cpp indices/1dgrid.cpp indices/hierarchicalindex.cpp indices/hint.cpp indices/hint_m.cpp indices/hint_m_subs+sort.cpp indices/hint_m_subs+sopt.cpp indices/hint_m_subs+sort+sopt.cpp indices/hint_m_subs+sort+sopt+ss.cpp indices/hint_m_subs+sort+cm.cpp indices/hint_m_subs+sort+sopt+cm.cpp indices/hint_m_subs+sort+ss+cm.cpp indices/hint_m_all.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 
 all: query
@@ -20,7 +20,7 @@ hint: $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) utils.o containers/relation.o indices/hierarchicalindex.o indices/hint.o main_hint.cpp -o query_hint.exec $(LDADD)
 
 hint_m: $(OBJECTS)
-	$(CC) $(CFLAGS) $(LDFLAGS) utils.o containers/relation.o containers/offsets_templates.o containers/offsets.o indices/hierarchicalindex.o indices/hint_m.o indices/hint_m_subs+sort.o indices/hint_m_subs+sopt.o indices/hint_m_subs+sort+sopt.o indices/hint_m_subs+sort+sopt+ss.o indices/hint_m_subs+sort+sopt+cm.o indices/hint_m_subs+sort+ss+cm.o indices/hint_m_all.o main_hint_m.cpp -o query_hint_m.exec $(LDADD)
+	$(CC) $(CFLAGS) $(LDFLAGS) utils.o containers/relation.o containers/offsets_templates.o containers/offsets.o indices/hierarchicalindex.o indices/hint_m.o indices/hint_m_subs+sort.o indices/hint_m_subs+sopt.o indices/hint_m_subs+sort+sopt.o indices/hint_m_subs+sort+sopt+ss.o indices/hint_m_subs+sort+sopt+cm.o indices/hint_m_subs+sort+cm.o indices/hint_m_subs+sort+ss+cm.o indices/hint_m_all.o main_hint_m.cpp -o query_hint_m.exec $(LDADD)
 
 
 .cpp.o:

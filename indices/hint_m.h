@@ -203,6 +203,52 @@ public:
 
 
 
+// HINT^m with subs+sort and cash misses optimizations activated
+class HINT_M_SubsSort_CM : public HierarchicalIndex
+{
+private:
+    Relation      **pOrgsInTmp;
+    Relation      **pOrgsAftTmp;
+    Relation      **pRepsInTmp;
+    Relation      **pRepsAftTmp;
+    
+    RelationId    **pOrgsInIds;
+    RelationId    **pOrgsAftIds;
+    RelationId    **pRepsInIds;
+    RelationId    **pRepsAftIds;
+    vector<pair<Timestamp, Timestamp> > **pOrgsInTimestamps;
+    vector<pair<Timestamp, Timestamp> > **pOrgsAftTimestamps;
+    vector<pair<Timestamp, Timestamp> > **pRepsInTimestamps;
+    vector<pair<Timestamp, Timestamp> > **pRepsAftTimestamps;
+    
+    RecordId      **pOrgsIn_sizes, **pOrgsAft_sizes;
+    size_t        **pRepsIn_sizes, **pRepsAft_sizes;
+    
+    // Construction
+    inline void updateCounters(const Record &r);
+    inline void updatePartitions(const Record &r);
+    
+    // Querying
+    // Auxiliary functions to scan a partition.
+    inline void scanPartition_CheckBothTimestamps_gOverlaps(unsigned int level, Timestamp t, RelationId **ids, vector<pair<Timestamp, Timestamp>> **timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), RangeQuery &Q, size_t &result);
+    inline void scanPartition_CheckEnd_gOverlaps(unsigned int level, Timestamp t, RelationId **ids, vector<pair<Timestamp, Timestamp>> **timestamps, RangeQuery &Q, size_t &result);
+    inline void scanPartition_CheckEnd_gOverlaps(unsigned int level, Timestamp t, RelationId **ids, vector<pair<Timestamp, Timestamp>> **timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), RangeQuery &Q, size_t &result);
+    inline void scanPartition_CheckStart_gOverlaps(unsigned int level, Timestamp t, RelationId **ids, vector<pair<Timestamp, Timestamp>> **timestamps, bool (*compare)(const pair<Timestamp, Timestamp>&, const pair<Timestamp, Timestamp>&), RangeQuery &Q, size_t &result);
+    inline void scanPartition_NoChecks_gOverlaps(unsigned int level, Timestamp t, RelationId **ids, size_t &result);
+    inline void scanPartitions_NoChecks_gOverlaps(unsigned int level, Timestamp ts, Timestamp te, RelationId **ids, size_t &result);
+    
+public:
+    // Construction
+    HINT_M_SubsSort_CM(const Relation &R, const unsigned int numBits, const unsigned int maxBits);
+    void getStats();
+    ~HINT_M_SubsSort_CM();
+    
+    // Querying
+    size_t executeBottomUp_gOverlaps(RangeQuery q);
+};
+
+
+
 // HINT^m with subs+sort+sopt and cash misses optimizations activated
 class HINT_M_SubsSortSopt_CM : public HierarchicalIndex
 {

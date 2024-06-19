@@ -3,7 +3,7 @@
  * Purpose:  Indexing interval data
  * Author:   Panagiotis Bouros, pbour@github.io
  ******************************************************************************
- * Copyright (c) 2020 - 2023
+ * Copyright (c) 2020 - 2024
  *
  * All rights reserved.
  *
@@ -151,6 +151,11 @@ bool checkOptimizations(string strOptimizations, RunSettings &settings)
     else if (strOptimizations == "SUBS+SORT+SOPT+CM")
     {
         settings.typeOptimizations = HINT_M_OPTIMIZATIONS_SUBS_SORT_SOPT_CM;
+        return true;
+    }
+    else if (strOptimizations == "SUBS+SORT+CM")
+    {
+        settings.typeOptimizations = HINT_M_OPTIMIZATIONS_SUBS_SORT_CM;
         return true;
     }
     else if (strOptimizations == "SUBS+SORT+SS+CM")
