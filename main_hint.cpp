@@ -278,34 +278,38 @@ int main(int argc, char **argv)
     cout << endl;
     cout << "HINT" << endl;
     cout << "====" << endl;
-    cout << "Num of intervals          : " << R.size() << endl;
-    cout << "Domain size               : " << (R.gend-R.gstart) << endl;
-    cout << "Avg interval extent [%]   : "; printf("%f\n", R.avgRecordExtent*100/(R.gend-R.gstart));
+    cout << "Input" << endl;
+    cout << "  Num of intervals          : " << R.size() << endl;
+    cout << "  Domain size               : " << (R.gend-R.gstart) << endl;
+    cout << "  Avg interval extent [%]   : "; printf("%f\n", R.avgRecordExtent*100/(R.gend-R.gstart));
     cout << endl;
-    cout << "Optimizations             : " << ((settings.typeOptimizations == HINT_OPTIMIZATIONS_NO)? "no": strOptimizations) << endl;
-    cout << "Num of bits               : " << settings.numBits << endl;
-    cout << "Num of partitions         : " << idxR->numPartitions << endl;
-    cout << "Num of Originals          : " << idxR->numOriginals << endl;
-    cout << "Num of replicas           : " << idxR->numReplicas << endl;
-    cout << "Num of empty partitions   : " << idxR->numEmptyPartitions << endl;
-    printf( "Avg partition size        : %f\n", idxR->avgPartitionSize);
-    printf( "Read VM [Bytes]           : %ld\n", (size_t)(vmI-vmDQ)*1024);
-    printf( "Read RSS [Bytes]          : %ld\n", (size_t)(rssI-rssDQ)*1024);
-    printf( "Indexing time [secs]      : %f\n\n", totalIndexTime);
-    cout << "Predicate type            : " << strPredicate << endl;
-    cout << "Num of runs per query     : " << settings.numRuns << endl;
-    cout << "Num of queries            : " << numQueries << endl;
-    cout << "Avg query extent [%]      : "; printf("%f\n", (((float)sumQ/numQueries)*100)/(R.gend-R.gstart));
-    cout << "Total result [";
+    cout << "Index" << endl;
+    cout << "  Optimizations             : " << ((settings.typeOptimizations == HINT_OPTIMIZATIONS_NO)? "no": strOptimizations) << endl;
+    cout << "  Num of bits               : " << settings.numBits << endl;
+    cout << "  Num of partitions         : " << idxR->numPartitions << endl;
+    cout << "  Num of Originals          : " << idxR->numOriginals << endl;
+    cout << "  Num of replicas           : " << idxR->numReplicas << endl;
+    cout << "  Num of empty partitions   : " << idxR->numEmptyPartitions << endl;
+    printf( "  Avg partition size        : %f\n", idxR->avgPartitionSize);
+    printf( "  Read VM [Bytes]           : %ld\n", (size_t)(vmI-vmDQ)*1024);
+    printf( "  Read RSS [Bytes]          : %ld\n", (size_t)(rssI-rssDQ)*1024);
+    printf( "  Indexing time [secs]      : %f\n\n", totalIndexTime);
+    cout << endl;
+    cout << "Queries" << endl;
+    cout << "  Predicate type            : " << strPredicate << endl;
+    cout << "  Num of runs per query     : " << settings.numRuns << endl;
+    cout << "  Num of queries            : " << numQueries << endl;
+    cout << "  Avg query extent [%]      : "; printf("%f\n", (((float)sumQ/numQueries)*100)/(R.gend-R.gstart));
+    cout << "  Total result [";
 #ifdef WORKLOAD_COUNT
     cout << "COUNT]      : ";
 #else
     cout << "XOR]        : ";
 #endif
     cout << totalResult << endl;
-    printf( "Total querying time [secs]: %f\n", totalQueryTime/settings.numRuns);
-    printf( "Avg querying time [secs]  : %f\n\n", avgQueryTime/numQueries);
-    printf( "Throughput [queries/sec]  : %f\n\n", numQueries/(totalQueryTime/settings.numRuns));
+    printf( "  Total querying time [secs]: %f\n", totalQueryTime/settings.numRuns);
+    printf( "  Avg querying time [secs]  : %f\n\n", avgQueryTime/numQueries);
+    printf( "  Throughput [queries/sec]  : %f\n\n", numQueries/(totalQueryTime/settings.numRuns));
     
     delete idxR;
     

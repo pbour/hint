@@ -2,6 +2,7 @@ CC      = g++
 CFLAGS  = -O3 -mavx -std=c++14 -w
 LDFLAGS =
 
+
 SOURCES = utils.cpp containers/relation.cpp containers/offsets_templates.cpp containers/offsets.cpp indices/1dgrid.cpp indices/hierarchicalindex.cpp indices/hint.cpp indices/hint_m.cpp indices/hint_m_subs+sort.cpp indices/hint_m_subs+sopt.cpp indices/hint_m_subs+sort+sopt.cpp indices/hint_m_subs+sort+sopt+ss.cpp indices/hint_m_subs+sort+cm.cpp indices/hint_m_subs+sort+sopt+cm.cpp indices/hint_m_subs+sort+ss+cm.cpp indices/hint_m_all.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 

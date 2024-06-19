@@ -244,26 +244,30 @@ int main(int argc, char **argv)
     cout << endl;
     cout << "Linear scan" << endl;
     cout << "===========" << endl;
-    cout << "Num of intervals          : " << R.size() << endl;
-    cout << "Domain size               : " << (R.gend-R.gstart) << endl;
-    cout << "Avg interval extent [%]   : "; printf("%f\n", R.avgRecordExtent*100/(R.gend-R.gstart));
+    cout << "Input" << endl;
+    cout << "  Num of intervals          : " << R.size() << endl;
+    cout << "  Domain size               : " << (R.gend-R.gstart) << endl;
+    cout << "  Avg interval extent [%]   : "; printf("%f\n", R.avgRecordExtent*100/(R.gend-R.gstart));
     cout << endl;
-    printf( "Read VM [Bytes]           : %ld\n", (size_t)(vmI-vmDQ)*1024);
-    printf( "Read RSS [Bytes]          : %ld\n", (size_t)(rssI-rssDQ)*1024);
-    cout << "Predicate type            : " << strPredicate << endl;
-    cout << "Num of runs per query     : " << settings.numRuns << endl;
-    cout << "Num of queries            : " << numQueries << endl;
-    cout << "Avg query extent [%]      : "; printf("%f\n", (((float)sumQ/numQueries)*100)/(R.gend-R.gstart));
-    cout << "Total result [";
+    cout << "Index" << endl;
+    printf( "  Read VM [Bytes]           : %ld\n", (size_t)(vmI-vmDQ)*1024);
+    printf( "  Read RSS [Bytes]          : %ld\n", (size_t)(rssI-rssDQ)*1024);
+    cout << endl;
+    cout << "Queries" << endl;
+    cout << "  Predicate type            : " << strPredicate << endl;
+    cout << "  Num of runs per query     : " << settings.numRuns << endl;
+    cout << "  Num of queries            : " << numQueries << endl;
+    cout << "  Avg query extent [%]      : "; printf("%f\n", (((float)sumQ/numQueries)*100)/(R.gend-R.gstart));
+    cout << "  Total result [";
 #ifdef WORKLOAD_COUNT
     cout << "COUNT]      : ";
 #else
     cout << "XOR]        : ";
 #endif
     cout << totalResult << endl;
-    printf( "Total querying time [secs]: %f\n", totalQueryTime/settings.numRuns);
-    printf( "Avg querying time [secs]  : %f\n\n", avgQueryTime/numQueries);
-    printf( "Throughput [queries/sec]  : %f\n\n", numQueries/(totalQueryTime/settings.numRuns));
+    printf( "  Total querying time [secs]: %f\n", totalQueryTime/settings.numRuns);
+    printf( "  Avg querying time [secs]  : %f\n\n", avgQueryTime/numQueries);
+    printf( "  Throughput [queries/sec]  : %f\n\n", numQueries/(totalQueryTime/settings.numRuns));
     
     
     return 0;
