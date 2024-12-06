@@ -3,6 +3,7 @@
  * Purpose:  Indexing interval data
  * Author:   Panagiotis Bouros, pbour@github.io
  * Author:   George Christodoulou
+ * Author:   Nikos Mamoulis
  ******************************************************************************
  * Copyright (c) 2020 - 2022
  *
