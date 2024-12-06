@@ -7,6 +7,12 @@ Source code from the following publications:
 
 - <p align="justify">George Christodoulou, Panagiotis Bouros and Nikos Mamoulis, <i>HINT: A Hierarchical Index for Intervals in Main Memory</i>, https://doi.org/10.1145/3514221.3517873, Proceedings of the 2022 ACM International Conference on Management of Data (ACM SIGMOD), pp. 1257-1270 (2022)</p>
 
+## Contributors
+- Panagiotis Bouros
+- George Christodoulou
+- Nikos Mamoulis
+
+
 ## Dependencies
 - g++/gcc
 - Boost Library 
