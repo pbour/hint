@@ -4,7 +4,7 @@
  * Author:   Panagiotis Bouros, pbour@github.io
  * Author:   Nikos Mamoulis
  ******************************************************************************
- * Copyright (c) 2020 - 2022
+ * Copyright (c) 2020 - 2024
  *
  * All rights reserved.
  *
