@@ -2,6 +2,7 @@
  * Project:  hint
  * Purpose:  Indexing interval data
  * Author:   Panagiotis Bouros, pbour@github.io
+ * Author:   George Christodoulou
  ******************************************************************************
  * Copyright (c) 2020 - 2022
  *
