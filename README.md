@@ -1,6 +1,9 @@
 # HINT: A Hierarchical Index for Intervals in Main Memory
 
 <p align="justify">Indexing intervals is a fundamental problem, finding a wide range of applications, most notably in temporal and uncertain databases. We propose HINT, a novel and efficient in-memory index for range selection queries over interval collections. HINT applies a hierarchical partitioning approach, which assigns each interval to at most two partitions per level and has controlled space requirements. We reduce the information stored at each partition to the absolutely necessary by dividing the intervals in it, based on whether they begin inside or before the partition boundaries. In addition, our index includes storage optimization techniques for the effective handling of data sparsity and skewness. We show how HINT can be used to efficiently process queries based on Allen’s relationships. Experiments on real and synthetic interval sets of different characteristics show that HINT is typically one order of magnitude faster than existing interval indexing methods.</p>
+<figure>
+  <img src="/figures/hint.jpg" width="400" alt="HINT example" />
+</figure>
 
 Source code from the following publications:
 - <p align="justify">George Christodoulou, Panagiotis Bouros and Nikos Mamoulis, <i>HINT: A Hierarchical Interval Index for Allen Relationships</i>, https://doi.org/10.1007/s00778-023-00798-w, VLDB Journal 33(1), pp. 73-100 (2024)</p>
